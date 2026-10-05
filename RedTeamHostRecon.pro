@@ -1,5 +1,4 @@
 QT += widgets
-QT += core gui widgets webenginewidgets webchannel
 CONFIG += c++17
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -8,6 +7,7 @@ CONFIG += c++17
 LIBS += -lNetapi32
 
 LIBS += -lWldap32
+LIBS += -lws2_32
 SOURCES += \
     main.cpp \
     mainwindow.cpp

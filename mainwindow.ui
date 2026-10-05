@@ -18,13 +18,13 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>10</y>
       <width>861</width>
-      <height>731</height>
+      <height>711</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -185,7 +185,7 @@
         <x>10</x>
         <y>10</y>
         <width>801</width>
-        <height>341</height>
+        <height>331</height>
        </rect>
       </property>
       <property name="columnCount">
@@ -218,7 +218,7 @@
         <x>10</x>
         <y>10</y>
         <width>811</width>
-        <height>341</height>
+        <height>331</height>
        </rect>
       </property>
       <column>
@@ -257,6 +257,84 @@
      <attribute name="title">
       <string>Network Discovery</string>
      </attribute>
+     <widget class="QTabWidget" name="tabWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>10</y>
+        <width>821</width>
+        <height>341</height>
+       </rect>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab_7">
+       <attribute name="title">
+        <string>Active Connections catched</string>
+       </attribute>
+       <widget class="QTreeWidget" name="treeWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>801</width>
+          <height>291</height>
+         </rect>
+        </property>
+        <column>
+         <property name="text">
+          <string>Local IP</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Local Port</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Remote IP</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Remote Port</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>State</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Process</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>PID</string>
+         </property>
+        </column>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_8">
+       <attribute name="title">
+        <string>DNS-Cache</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_9">
+       <attribute name="title">
+        <string>Subnet Scraping</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_10">
+       <attribute name="title">
+        <string>Interfaces</string>
+       </attribute>
+      </widget>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_5">
      <attribute name="title">

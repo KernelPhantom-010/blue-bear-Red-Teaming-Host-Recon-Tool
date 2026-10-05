@@ -36,6 +36,12 @@ public:
     QWidget *tab_3;
     QTreeWidget *treeWidget;
     QWidget *tab_4;
+    QTabWidget *tabWidget_2;
+    QWidget *tab_7;
+    QTreeWidget *treeWidget_2;
+    QWidget *tab_8;
+    QWidget *tab_9;
+    QWidget *tab_10;
     QWidget *tab_5;
     QWidget *tab_6;
     QMenuBar *menubar;
@@ -50,7 +56,7 @@ public:
         centralwidget->setObjectName("centralwidget");
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName("tabWidget");
-        tabWidget->setGeometry(QRect(0, 0, 861, 731));
+        tabWidget->setGeometry(QRect(0, 10, 861, 711));
         tab = new QWidget();
         tab->setObjectName("tab");
         label = new QLabel(tab);
@@ -115,7 +121,7 @@ public:
         tab_2->setObjectName("tab_2");
         tableWidget_2 = new QTreeWidget(tab_2);
         tableWidget_2->setObjectName("tableWidget_2");
-        tableWidget_2->setGeometry(QRect(10, 10, 801, 341));
+        tableWidget_2->setGeometry(QRect(10, 10, 801, 331));
         tableWidget_2->setColumnCount(3);
         tabWidget->addTab(tab_2, QString());
         tab_3 = new QWidget();
@@ -125,10 +131,28 @@ public:
         __qtreewidgetitem->setText(0, QString::fromUtf8("Process"));
         treeWidget->setHeaderItem(__qtreewidgetitem);
         treeWidget->setObjectName("treeWidget");
-        treeWidget->setGeometry(QRect(10, 10, 811, 341));
+        treeWidget->setGeometry(QRect(10, 10, 811, 331));
         tabWidget->addTab(tab_3, QString());
         tab_4 = new QWidget();
         tab_4->setObjectName("tab_4");
+        tabWidget_2 = new QTabWidget(tab_4);
+        tabWidget_2->setObjectName("tabWidget_2");
+        tabWidget_2->setGeometry(QRect(0, 10, 821, 341));
+        tab_7 = new QWidget();
+        tab_7->setObjectName("tab_7");
+        treeWidget_2 = new QTreeWidget(tab_7);
+        treeWidget_2->setObjectName("treeWidget_2");
+        treeWidget_2->setGeometry(QRect(10, 10, 801, 291));
+        tabWidget_2->addTab(tab_7, QString());
+        tab_8 = new QWidget();
+        tab_8->setObjectName("tab_8");
+        tabWidget_2->addTab(tab_8, QString());
+        tab_9 = new QWidget();
+        tab_9->setObjectName("tab_9");
+        tabWidget_2->addTab(tab_9, QString());
+        tab_10 = new QWidget();
+        tab_10->setObjectName("tab_10");
+        tabWidget_2->addTab(tab_10, QString());
         tabWidget->addTab(tab_4, QString());
         tab_5 = new QWidget();
         tab_5->setObjectName("tab_5");
@@ -147,7 +171,8 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(2);
+        tabWidget->setCurrentIndex(3);
+        tabWidget_2->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -195,6 +220,18 @@ public:
         ___qtreewidgetitem1->setText(2, QCoreApplication::translate("MainWindow", "SeImpersonatePrivilege?", nullptr));
         ___qtreewidgetitem1->setText(1, QCoreApplication::translate("MainWindow", "PID", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_3), QCoreApplication::translate("MainWindow", "Token Discovery", nullptr));
+        QTreeWidgetItem *___qtreewidgetitem2 = treeWidget_2->headerItem();
+        ___qtreewidgetitem2->setText(6, QCoreApplication::translate("MainWindow", "PID", nullptr));
+        ___qtreewidgetitem2->setText(5, QCoreApplication::translate("MainWindow", "Process", nullptr));
+        ___qtreewidgetitem2->setText(4, QCoreApplication::translate("MainWindow", "State", nullptr));
+        ___qtreewidgetitem2->setText(3, QCoreApplication::translate("MainWindow", "Remote Port", nullptr));
+        ___qtreewidgetitem2->setText(2, QCoreApplication::translate("MainWindow", "Remote IP", nullptr));
+        ___qtreewidgetitem2->setText(1, QCoreApplication::translate("MainWindow", "Local Port", nullptr));
+        ___qtreewidgetitem2->setText(0, QCoreApplication::translate("MainWindow", "Local IP", nullptr));
+        tabWidget_2->setTabText(tabWidget_2->indexOf(tab_7), QCoreApplication::translate("MainWindow", "Active Connections catched", nullptr));
+        tabWidget_2->setTabText(tabWidget_2->indexOf(tab_8), QCoreApplication::translate("MainWindow", "DNS-Cache", nullptr));
+        tabWidget_2->setTabText(tabWidget_2->indexOf(tab_9), QCoreApplication::translate("MainWindow", "Subnet Scraping", nullptr));
+        tabWidget_2->setTabText(tabWidget_2->indexOf(tab_10), QCoreApplication::translate("MainWindow", "Interfaces", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_4), QCoreApplication::translate("MainWindow", "Network Discovery", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_5), QCoreApplication::translate("MainWindow", "Service Discovery", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_6), QCoreApplication::translate("MainWindow", "Persistence", nullptr));

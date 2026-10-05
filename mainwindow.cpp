@@ -1,5 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #include <windows.h>
 #include <lm.h>
 #include <TlHelp32.h>
@@ -514,9 +515,50 @@ MainWindow::MainWindow(QWidget *parent)
 
         //Network Discovery
 
+        DWORD bytesRequired = 0;
+        GetExtendedTcpTable(nullptr, &bytesRequired, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0);
+        std::vector<BYTE> heapLocationForTable(bytesRequired);
+        MIB_TCPTABLE_OWNER_PID* pTcpTableNet = reinterpret_cast<MIB_TCPTABLE_OWNER_PID*>(heapLocationForTable.data());
+        GetExtendedTcpTable(pTcpTableNet, &bytesRequired, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0);
 
+        for (DWORD i = 0; i < pTcpTableNet->dwNumEntries; ++i){
+            MIB_TCPROW_OWNER_PID row = pTcpTableNet->table[i];
 
+            in_addr localAddr{};
+            localAddr.S_un.S_addr = row.dwLocalAddr;
+            char localBuf[64]{};
+            InetNtopA(AF_INET, &localAddr, localBuf, sizeof(localBuf));
 
+            in_addr remoteAddr{};
+            remoteAddr.S_un.S_addr = row.dwRemoteAddr;
+            char remoteBuf[64]{};
+            InetNtopA(AF_INET, &remoteAddr, remoteBuf, sizeof(remoteBuf));
+
+            DWORD localPort = ntohs((u_short)row.dwLocalPort);
+            DWORD remotePort = ntohs((u_short)row.dwRemotePort);
+
+            // Prozessname aus pids/processNames nachschlagen
+            QString procName = "Unknown";
+            for (int x = 0; x < (int)pids.size(); x++){
+                if (pids[x] == row.dwOwningPid){
+                    procName = QString::fromStdString(processNames[x]);
+                    break;
+                }
+            }
+
+            QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget_2);
+            item->setText(0, QString::fromLocal8Bit(localBuf));
+            item->setText(1, QString::number(localPort));
+            item->setText(2, QString::fromLocal8Bit(remoteBuf));
+            item->setText(3, QString::number(remotePort));
+            item->setText(5, procName);
+            item->setText(6, QString::number(row.dwOwningPid));
+
+            std::vector<DWORD> vectorForState = {MIB_TCP_STATE_CLOSED, MIB_TCP_STATE_LISTEN, MIB_TCP_STATE_SYN_SENT, MIB_TCP_STATE_SYN_RCVD, MIB_TCP_STATE_ESTAB, MIB_TCP_STATE_FIN_WAIT1, MIB_TCP_STATE_FIN_WAIT2, MIB_TCP_STATE_CLOSE_WAIT, MIB_TCP_STATE_CLOSING, MIB_TCP_STATE_LAST_ACK, MIB_TCP_STATE_TIME_WAIT, MIB_TCP_STATE_DELETE_TCB};
+            for (DWORD entry : vectorForState){
+                //für jedes entry hier einmal abchecken ob es aus pTcpTable.pState übereinstimmt und wenn ja jeweils item->setText(4, ... setzen!
+            }
+        }
 
     }
 
