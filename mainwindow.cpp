@@ -24,6 +24,91 @@
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "Wldap32.lib")
 #pragma comment(lib, "Iphlpapi.lib")
+std::string RunPowerShell(const std::string& psCommand) {
+    std::string result;
+
+
+    std::wstring cmdLine = L"powershell.exe -NoProfile -Command \"";
+    for (char c : psCommand) cmdLine += (wchar_t)c;
+    cmdLine += L"\"";
+
+
+    SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, TRUE };
+    HANDLE hStdOutRead = nullptr, hStdOutWrite = nullptr;
+    CreatePipe(&hStdOutRead, &hStdOutWrite, &sa, 0);
+    SetHandleInformation(hStdOutRead, HANDLE_FLAG_INHERIT, 0);
+
+
+    STARTUPINFOW si = {};
+    si.cb = sizeof(STARTUPINFOW);
+    si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;
+    si.hStdOutput = hStdOutWrite;
+    si.hStdError  = hStdOutWrite;
+    si.hStdInput  = nullptr;
+
+
+    PROCESS_INFORMATION pi = {};
+    std::vector<wchar_t> commandLine(cmdLine.begin(), cmdLine.end());
+    commandLine.push_back(L'\0');
+    BOOL ok = CreateProcessW(
+        L"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        commandLine.data(),
+        nullptr,
+        nullptr,
+        TRUE,
+        CREATE_NO_WINDOW,
+        nullptr,
+        nullptr,
+        &si,
+        &pi
+        );
+
+    if (!ok) {
+        CloseHandle(hStdOutRead);
+        CloseHandle(hStdOutWrite);
+        throw std::runtime_error("CreateProcess failed");
+    }
+
+
+    CloseHandle(hStdOutWrite);
+    CloseHandle(pi.hThread);
+
+
+    char buf[4096];
+    DWORD bytesRead;
+    while (ReadFile(hStdOutRead, buf, sizeof(buf) - 1, &bytesRead, nullptr) && bytesRead > 0) {
+        buf[bytesRead] = '\0';
+        result += buf;
+    }
+
+
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    CloseHandle(pi.hProcess);
+    CloseHandle(hStdOutRead);
+
+    return result;
+}
+std::string GetTcpStateName(DWORD state)
+{
+    switch (state)
+    {
+    case MIB_TCP_STATE_CLOSED:     return "CLOSED";
+    case MIB_TCP_STATE_LISTEN:     return "LISTEN";
+    case MIB_TCP_STATE_SYN_SENT:   return "SYN_SENT";
+    case MIB_TCP_STATE_SYN_RCVD:   return "SYN_RECEIVED";
+    case MIB_TCP_STATE_ESTAB:      return "ESTABLISHED";
+    case MIB_TCP_STATE_FIN_WAIT1:  return "FIN_WAIT_1";
+    case MIB_TCP_STATE_FIN_WAIT2:  return "FIN_WAIT_2";
+    case MIB_TCP_STATE_CLOSE_WAIT: return "CLOSE_WAIT";
+    case MIB_TCP_STATE_CLOSING:    return "CLOSING";
+    case MIB_TCP_STATE_LAST_ACK:   return "LAST_ACK";
+    case MIB_TCP_STATE_TIME_WAIT:  return "TIME_WAIT";
+    case MIB_TCP_STATE_DELETE_TCB: return "DELETE_TCB";
+    default:                       return "UNKNOWN";
+    }
+}
+
 using RtlGetVersionCopy = NTSTATUS (*)(PRTL_OSVERSIONINFOW);
 
 static void EnableDebugPrivilege()
@@ -555,13 +640,25 @@ MainWindow::MainWindow(QWidget *parent)
             item->setText(6, QString::number(row.dwOwningPid));
 
             std::vector<DWORD> vectorForState = {MIB_TCP_STATE_CLOSED, MIB_TCP_STATE_LISTEN, MIB_TCP_STATE_SYN_SENT, MIB_TCP_STATE_SYN_RCVD, MIB_TCP_STATE_ESTAB, MIB_TCP_STATE_FIN_WAIT1, MIB_TCP_STATE_FIN_WAIT2, MIB_TCP_STATE_CLOSE_WAIT, MIB_TCP_STATE_CLOSING, MIB_TCP_STATE_LAST_ACK, MIB_TCP_STATE_TIME_WAIT, MIB_TCP_STATE_DELETE_TCB};
+            int count = 0;
+
             for (DWORD entry : vectorForState){
                 //für jedes entry hier einmal abchecken ob es aus pTcpTable.pState übereinstimmt und wenn ja jeweils item->setText(4, ... setzen!
+                if (entry == pTcpTableNet->table[i].dwState){
+                    std::string tcpName = GetTcpStateName(entry);
+                    item->setText(4, QString::fromStdString(tcpName));
+                }
+                count++;
             }
+
+
+
         }
 
     }
-
+    std::string returnDnsCache = RunPowerShell("Get-DnsClientCache");
+    QString dnsC_conv = QString::fromStdString(returnDnsCache);
+    ui->plainTextEdit->setPlainText(dnsC_conv);
 
 
 

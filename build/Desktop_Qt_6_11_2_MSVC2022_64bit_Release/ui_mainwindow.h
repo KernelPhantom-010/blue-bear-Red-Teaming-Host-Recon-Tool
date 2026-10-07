@@ -15,6 +15,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTableWidget>
@@ -40,6 +41,7 @@ public:
     QWidget *tab_7;
     QTreeWidget *treeWidget_2;
     QWidget *tab_8;
+    QPlainTextEdit *plainTextEdit;
     QWidget *tab_9;
     QWidget *tab_10;
     QWidget *tab_5;
@@ -146,6 +148,9 @@ public:
         tabWidget_2->addTab(tab_7, QString());
         tab_8 = new QWidget();
         tab_8->setObjectName("tab_8");
+        plainTextEdit = new QPlainTextEdit(tab_8);
+        plainTextEdit->setObjectName("plainTextEdit");
+        plainTextEdit->setGeometry(QRect(10, 10, 801, 291));
         tabWidget_2->addTab(tab_8, QString());
         tab_9 = new QWidget();
         tab_9->setObjectName("tab_9");
@@ -172,7 +177,7 @@ public:
         retranslateUi(MainWindow);
 
         tabWidget->setCurrentIndex(3);
-        tabWidget_2->setCurrentIndex(0);
+        tabWidget_2->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
