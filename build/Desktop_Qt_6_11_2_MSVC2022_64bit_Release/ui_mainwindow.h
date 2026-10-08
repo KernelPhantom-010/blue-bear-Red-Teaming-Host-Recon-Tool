@@ -43,6 +43,7 @@ public:
     QWidget *tab_8;
     QPlainTextEdit *plainTextEdit;
     QWidget *tab_9;
+    QTreeWidget *treeWidget_3;
     QWidget *tab_10;
     QWidget *tab_5;
     QWidget *tab_6;
@@ -154,6 +155,9 @@ public:
         tabWidget_2->addTab(tab_8, QString());
         tab_9 = new QWidget();
         tab_9->setObjectName("tab_9");
+        treeWidget_3 = new QTreeWidget(tab_9);
+        treeWidget_3->setObjectName("treeWidget_3");
+        treeWidget_3->setGeometry(QRect(10, 10, 801, 291));
         tabWidget_2->addTab(tab_9, QString());
         tab_10 = new QWidget();
         tab_10->setObjectName("tab_10");
@@ -177,7 +181,7 @@ public:
         retranslateUi(MainWindow);
 
         tabWidget->setCurrentIndex(3);
-        tabWidget_2->setCurrentIndex(1);
+        tabWidget_2->setCurrentIndex(2);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -235,6 +239,11 @@ public:
         ___qtreewidgetitem2->setText(0, QCoreApplication::translate("MainWindow", "Local IP", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_7), QCoreApplication::translate("MainWindow", "Active Connections catched", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_8), QCoreApplication::translate("MainWindow", "DNS-Cache", nullptr));
+        QTreeWidgetItem *___qtreewidgetitem3 = treeWidget_3->headerItem();
+        ___qtreewidgetitem3->setText(3, QCoreApplication::translate("MainWindow", "Metric", nullptr));
+        ___qtreewidgetitem3->setText(2, QCoreApplication::translate("MainWindow", "Gateway", nullptr));
+        ___qtreewidgetitem3->setText(1, QCoreApplication::translate("MainWindow", "Prefix", nullptr));
+        ___qtreewidgetitem3->setText(0, QCoreApplication::translate("MainWindow", "Destination ", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_9), QCoreApplication::translate("MainWindow", "Subnet Scraping", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_10), QCoreApplication::translate("MainWindow", "Interfaces", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_4), QCoreApplication::translate("MainWindow", "Network Discovery", nullptr));

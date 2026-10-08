@@ -13,6 +13,7 @@
 #include <codecvt>
 #include <DSRole.h>
 #include <lmapibuf.h>
+#include <netioapi.h>
 #include "mainwindow.h"
 #include <iphlpapi.h>
 #include "ui_mainwindow.h"
@@ -660,6 +661,60 @@ MainWindow::MainWindow(QWidget *parent)
     QString dnsC_conv = QString::fromStdString(returnDnsCache);
     ui->plainTextEdit->setPlainText(dnsC_conv);
 
+    MIB_IPFORWARD_TABLE2 *ipForwardTableStruct{};
+    NTSTATUS retVal_SubnetScrape = GetIpForwardTable2(AF_INET, &ipForwardTableStruct);
+
+    if (retVal_SubnetScrape != NO_ERROR){
+        switch (retVal_SubnetScrape){
+        case ERROR_INVALID_PARAMETER:
+            MessageBoxA(NULL, "Invalid Param in GetIpForwardTable2", "Error", MB_OK);
+            break;
+
+        case ERROR_NOT_ENOUGH_MEMORY:
+            MessageBoxA(NULL, "Insufficient memory resources are available to complete the operation.", "Error", MB_OK);
+            break;
+        case ERROR_NOT_FOUND:
+            MessageBoxA(NULL, "No IP route entries as specified in the Family parameter were found.", "Error", MB_OK);
+            break;
+        case ERROR_NOT_SUPPORTED:
+            MessageBoxA(NULL, "	The request is not supported.", "Error", MB_OK);
+            break;
+        }
+    }else{
+
+        for (ULONG entry = 0; entry < ipForwardTableStruct->NumEntries; entry++){
+
+            MIB_IPFORWARD_ROW2 currentEntry = ipForwardTableStruct->Table[entry];
+
+            SOCKADDR_INET Destinationn = currentEntry.DestinationPrefix.Prefix;
+            UINT8  PrefixLength = currentEntry.DestinationPrefix.PrefixLength;
+            SOCKADDR_INET Gatewayy = currentEntry.NextHop;
+            ULONG metricc = currentEntry.Metric;
+
+            QTreeWidgetItem* itemmm = new QTreeWidgetItem(ui->treeWidget_3);
+
+            SOCKADDR_IN IpAddrr = Destinationn.Ipv4;
+            char ipAddressFullConverted[INET6_ADDRSTRLEN];
+            inet_ntop(AF_INET, &IpAddrr.sin_addr, ipAddressFullConverted, sizeof(ipAddressFullConverted));
+            std::string intoStdStringIpAddr = ipAddressFullConverted;
+
+            itemmm->setText(0, QString::fromStdString(intoStdStringIpAddr));
+
+            std::string prefixStdStr = std::to_string(PrefixLength);
+
+            itemmm->setText(1, "/" + QString::fromStdString(prefixStdStr));
+
+            char gateWayFullConverted[INET6_ADDRSTRLEN];
+            inet_ntop(AF_INET, &Gatewayy.Ipv4.sin_addr, gateWayFullConverted, sizeof(gateWayFullConverted));
+            std::string intoStdStringGateWay = gateWayFullConverted;
+
+            itemmm->setText(2, QString::fromStdString(intoStdStringGateWay));
+
+            itemmm->setText(3, QString::fromStdString(std::to_string(metricc)));
+
+        }
+
+    }
 
 
 

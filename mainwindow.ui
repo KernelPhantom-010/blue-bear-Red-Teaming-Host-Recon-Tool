@@ -267,7 +267,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_7">
        <attribute name="title">
@@ -338,6 +338,36 @@
        <attribute name="title">
         <string>Subnet Scraping</string>
        </attribute>
+       <widget class="QTreeWidget" name="treeWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>801</width>
+          <height>291</height>
+         </rect>
+        </property>
+        <column>
+         <property name="text">
+          <string>Destination </string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Prefix</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Gateway</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Metric</string>
+         </property>
+        </column>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab_10">
        <attribute name="title">
