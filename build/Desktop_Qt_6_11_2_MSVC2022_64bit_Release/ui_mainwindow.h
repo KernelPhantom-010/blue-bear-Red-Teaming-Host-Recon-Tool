@@ -45,6 +45,7 @@ public:
     QWidget *tab_9;
     QTreeWidget *treeWidget_3;
     QWidget *tab_10;
+    QTreeWidget *treeWidget_4;
     QWidget *tab_5;
     QWidget *tab_6;
     QMenuBar *menubar;
@@ -161,6 +162,9 @@ public:
         tabWidget_2->addTab(tab_9, QString());
         tab_10 = new QWidget();
         tab_10->setObjectName("tab_10");
+        treeWidget_4 = new QTreeWidget(tab_10);
+        treeWidget_4->setObjectName("treeWidget_4");
+        treeWidget_4->setGeometry(QRect(0, 0, 811, 301));
         tabWidget_2->addTab(tab_10, QString());
         tabWidget->addTab(tab_4, QString());
         tab_5 = new QWidget();
@@ -181,7 +185,7 @@ public:
         retranslateUi(MainWindow);
 
         tabWidget->setCurrentIndex(3);
-        tabWidget_2->setCurrentIndex(2);
+        tabWidget_2->setCurrentIndex(3);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -245,6 +249,11 @@ public:
         ___qtreewidgetitem3->setText(1, QCoreApplication::translate("MainWindow", "Prefix", nullptr));
         ___qtreewidgetitem3->setText(0, QCoreApplication::translate("MainWindow", "Destination ", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_9), QCoreApplication::translate("MainWindow", "Subnet Scraping", nullptr));
+        QTreeWidgetItem *___qtreewidgetitem4 = treeWidget_4->headerItem();
+        ___qtreewidgetitem4->setText(3, QCoreApplication::translate("MainWindow", "Addresses", nullptr));
+        ___qtreewidgetitem4->setText(2, QCoreApplication::translate("MainWindow", "OperStatus", nullptr));
+        ___qtreewidgetitem4->setText(1, QCoreApplication::translate("MainWindow", "Description", nullptr));
+        ___qtreewidgetitem4->setText(0, QCoreApplication::translate("MainWindow", "Adapter Name", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_10), QCoreApplication::translate("MainWindow", "Interfaces", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_4), QCoreApplication::translate("MainWindow", "Network Discovery", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_5), QCoreApplication::translate("MainWindow", "Service Discovery", nullptr));

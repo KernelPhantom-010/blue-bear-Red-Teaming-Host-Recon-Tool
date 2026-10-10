@@ -718,6 +718,80 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
+    ULONG bytesReqAddresses = 0;
+
+    PIP_ADAPTER_ADDRESSES adapterStruct = {0};
+
+    ULONG retAddresses = GetAdaptersAddresses(AF_INET, 0, nullptr, nullptr, &bytesReqAddresses);
+    if (retAddresses == ERROR_BUFFER_OVERFLOW){
+        adapterStruct = (PIP_ADAPTER_ADDRESSES)malloc(bytesReqAddresses);
+        retAddresses = GetAdaptersAddresses(AF_INET, 0, NULL, adapterStruct, &bytesReqAddresses);
+    }
+    if (retAddresses == NO_ERROR){
+
+
+        PIP_ADAPTER_ADDRESSES adapterssss = adapterStruct;
+        while (adapterssss){
+            PWCHAR adapterName = adapterssss->FriendlyName;
+            wchar_t* description = adapterssss->Description;
+            IF_OPER_STATUS operstatus = adapterssss->OperStatus;
+
+
+            QTreeWidgetItem* table4 = new QTreeWidgetItem(ui->treeWidget_4);
+
+            table4->setText(0, QString::fromStdWString(std::wstring(adapterName)));
+            table4->setText(1, QString::fromStdWString(std::wstring(description)));
+
+
+            switch (operstatus){
+            case IfOperStatusUp:
+                table4->setText(2, "1 (ACTIVE)");
+                break;
+            case IfOperStatusDown:
+                table4->setText(2, "2 (NOT ACTIVE)");
+                break;
+            case IfOperStatusTesting:
+                table4->setText(2, "3 (TESTING-MODE)");
+                break;
+            case IfOperStatusUnknown:
+                table4->setText(2, "4 (UNKNOWN)");
+                break;
+            case IfOperStatusDormant:
+                table4->setText(2, "5 (ACTIVE/WAITING FOR EVENT)");
+                break;
+            case IfOperStatusNotPresent:
+                table4->setText(2, "6 (HARDWARE-COMPONENT MISSING)");
+                break;
+            case IfOperStatusLowerLayerDown:
+                table4->setText(2, "7 (LOWER LAYER DOWN)");
+                break;
+            }
+
+            PIP_ADAPTER_UNICAST_ADDRESS addresses = adapterssss->FirstUnicastAddress;
+            while (addresses){
+
+                char AddrIp[INET6_ADDRSTRLEN] = {};
+
+                inet_ntop(addresses->Address.lpSockaddr->sa_family,
+                          addresses->Address.lpSockaddr->sa_family == AF_INET ?
+                              (const void*)&((sockaddr_in*)addresses->Address.lpSockaddr)->sin_addr :
+                              (const void*)&((sockaddr_in6*)addresses->Address.lpSockaddr)->sin6_addr,
+                          AddrIp, INET6_ADDRSTRLEN);
+
+                table4->setText(3, QString::fromStdString(std::string(AddrIp)));
+
+                addresses = addresses->Next;
+            }
+
+            adapterssss = adapterssss->Next;
+        }
+        free(adapterStruct);
+
+
+
+    }
+
+
 }
 
 MainWindow::~MainWindow()

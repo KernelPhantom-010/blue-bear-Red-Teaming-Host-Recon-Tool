@@ -267,7 +267,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tab_7">
        <attribute name="title">
@@ -373,6 +373,36 @@
        <attribute name="title">
         <string>Interfaces</string>
        </attribute>
+       <widget class="QTreeWidget" name="treeWidget_4">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>811</width>
+          <height>301</height>
+         </rect>
+        </property>
+        <column>
+         <property name="text">
+          <string>Adapter Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Description</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>OperStatus</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Addresses</string>
+         </property>
+        </column>
+       </widget>
       </widget>
      </widget>
     </widget>
