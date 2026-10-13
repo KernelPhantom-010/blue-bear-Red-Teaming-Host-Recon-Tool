@@ -47,6 +47,7 @@ public:
     QWidget *tab_10;
     QTreeWidget *treeWidget_4;
     QWidget *tab_5;
+    QTreeWidget *treeWidget_5;
     QWidget *tab_6;
     QMenuBar *menubar;
     QStatusBar *statusbar;
@@ -169,6 +170,9 @@ public:
         tabWidget->addTab(tab_4, QString());
         tab_5 = new QWidget();
         tab_5->setObjectName("tab_5");
+        treeWidget_5 = new QTreeWidget(tab_5);
+        treeWidget_5->setObjectName("treeWidget_5");
+        treeWidget_5->setGeometry(QRect(0, 0, 821, 351));
         tabWidget->addTab(tab_5, QString());
         tab_6 = new QWidget();
         tab_6->setObjectName("tab_6");
@@ -184,7 +188,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(3);
+        tabWidget->setCurrentIndex(4);
         tabWidget_2->setCurrentIndex(3);
 
 
@@ -256,6 +260,14 @@ public:
         ___qtreewidgetitem4->setText(0, QCoreApplication::translate("MainWindow", "Adapter Name", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_10), QCoreApplication::translate("MainWindow", "Interfaces", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_4), QCoreApplication::translate("MainWindow", "Network Discovery", nullptr));
+        QTreeWidgetItem *___qtreewidgetitem5 = treeWidget_5->headerItem();
+        ___qtreewidgetitem5->setText(6, QCoreApplication::translate("MainWindow", "Description", nullptr));
+        ___qtreewidgetitem5->setText(5, QCoreApplication::translate("MainWindow", "Account", nullptr));
+        ___qtreewidgetitem5->setText(4, QCoreApplication::translate("MainWindow", "Binary Path", nullptr));
+        ___qtreewidgetitem5->setText(3, QCoreApplication::translate("MainWindow", "StartType", nullptr));
+        ___qtreewidgetitem5->setText(2, QCoreApplication::translate("MainWindow", "Type", nullptr));
+        ___qtreewidgetitem5->setText(1, QCoreApplication::translate("MainWindow", "Status", nullptr));
+        ___qtreewidgetitem5->setText(0, QCoreApplication::translate("MainWindow", "Name / DisplayName", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_5), QCoreApplication::translate("MainWindow", "Service Discovery", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_6), QCoreApplication::translate("MainWindow", "Persistence", nullptr));
     } // retranslateUi

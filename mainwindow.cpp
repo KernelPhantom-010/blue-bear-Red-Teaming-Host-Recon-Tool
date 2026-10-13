@@ -127,6 +127,22 @@ static void EnableDebugPrivilege()
     CloseHandle(token);
 }
 
+std::wstring GetServiceTypeString(DWORD type) {
+    std::wstring result;
+
+    if (type & SERVICE_KERNEL_DRIVER)
+        result += L"Kernel Driver ";
+    if (type & SERVICE_FILE_SYSTEM_DRIVER)
+        result += L"File System Driver ";
+    if (type & SERVICE_WIN32_OWN_PROCESS)
+        result += L"Win32 Own Process ";
+    if (type & SERVICE_WIN32_SHARE_PROCESS)
+        result += L"Win32 Share Process ";
+    if (type & SERVICE_INTERACTIVE_PROCESS)
+        result += L"Interactive ";
+
+    return result.empty() ? L"Unknown" : result;
+}
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -787,10 +803,46 @@ MainWindow::MainWindow(QWidget *parent)
         }
         free(adapterStruct);
 
+    }
+
+
+    SC_HANDLE scm_handle = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
+    DWORD bytesNeeded = 0;
+    DWORD      resumeHandle;
+    DWORD servicesReturned = 0;
+
+
+    EnumServicesStatusEx(scm_handle, SC_ENUM_PROCESS_INFO,
+                         SERVICE_DRIVER | SERVICE_WIN32, SERVICE_STATE_ALL,
+                         nullptr, 0, &bytesNeeded, &servicesReturned, &resumeHandle, nullptr);
+
+    std::vector<BYTE> buffer(bytesNeeded);
+    auto services = reinterpret_cast<ENUM_SERVICE_STATUS_PROCESS*>(buffer.data());
+    if (!EnumServicesStatusEx(scm_handle, SC_ENUM_PROCESS_INFO,
+                              SERVICE_DRIVER | SERVICE_WIN32, SERVICE_STATE_ALL,
+                              reinterpret_cast<LPBYTE>(services), bytesNeeded,
+                              &bytesNeeded, &servicesReturned, &resumeHandle, nullptr)) {
+        DWORD lastErr = GetLastError();
+        char errMsg[5000];
+        sprintf(errMsg, "Error Code for Service Enumeration -> %ld", lastErr);
+        MessageBoxA(NULL, errMsg, "Warning", NULL);
+    }
+
+    for (int x = 0; x < servicesReturned; x++){
+
+        wchar_t* displayName = services[x].lpDisplayName;
+        wchar_t* realName = services[x].lpServiceName;
+        std::wstring fullIt = std::wstring(displayName) + L" / " + realName;
+        DWORD type = services[x].ServiceStatusProcess.dwServiceType;
+
+
+
+        QTreeWidgetItem* itemServices = new QTreeWidgetItem(ui->treeWidget_5);
+        itemServices->setText(0, QString::fromStdWString(fullIt));
+        itemServices->setText(2, QString::fromStdWString(GetServiceTypeString(type)));
 
 
     }
-
 
 }
 

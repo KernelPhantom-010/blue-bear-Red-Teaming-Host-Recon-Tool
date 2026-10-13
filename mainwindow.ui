@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -410,6 +410,51 @@
      <attribute name="title">
       <string>Service Discovery</string>
      </attribute>
+     <widget class="QTreeWidget" name="treeWidget_5">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>821</width>
+        <height>351</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>Name / DisplayName</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Status</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>StartType</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Binary Path</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Account</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Description</string>
+       </property>
+      </column>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_6">
      <attribute name="title">
