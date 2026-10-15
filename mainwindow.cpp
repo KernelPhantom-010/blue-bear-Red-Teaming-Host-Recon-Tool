@@ -865,8 +865,14 @@ MainWindow::MainWindow(QWidget *parent)
         DWORD type = services[x].ServiceStatusProcess.dwServiceType;
         DWORD status = services[x].ServiceStatusProcess.dwCurrentState;
         QString status_conv = whichStatus(status);
+        char serviceNameANSI[3500];
+        wcstombs(serviceNameANSI, services[x].lpServiceName, sizeof(serviceNameANSI));
 
         SC_HANDLE db_handle = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
+
+        SC_HANDLE services_handle = OpenServiceA(db_handle, serviceNameANSI, SERVICE_QUERY_CONFIG);
+
+
 
         QTreeWidgetItem* itemServices = new QTreeWidgetItem(ui->treeWidget_5);
         itemServices->setText(0, QString::fromStdWString(fullIt));
