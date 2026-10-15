@@ -25,6 +25,35 @@
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "Wldap32.lib")
 #pragma comment(lib, "Iphlpapi.lib")
+
+QString whichStatus(DWORD statusCode){
+    switch (statusCode){
+    case SERVICE_CONTINUE_PENDING:
+        return "SERVICE_CONTINUE_PENDING";
+        break;
+    case SERVICE_PAUSE_PENDING:
+        return "SERVICE_PAUSE_PENDING";
+        break;
+    case SERVICE_PAUSED:
+        return "SERVICE_PAUSED";
+        break;
+    case SERVICE_RUNNING:
+        return "SERVICE_RUNNING";
+        break;
+    case SERVICE_START_PENDING:
+        return "SERVICE_START_PENDING";
+        break;
+    case SERVICE_STOP_PENDING:
+        return "SERVICE_STOP_PENDING";
+        break;
+    case SERVICE_STOPPED:
+        return "SERVICE_STOPPED";
+        break;
+    }
+    return "N/A";
+}
+
+
 std::string RunPowerShell(const std::string& psCommand) {
     std::string result;
 
@@ -834,15 +863,19 @@ MainWindow::MainWindow(QWidget *parent)
         wchar_t* realName = services[x].lpServiceName;
         std::wstring fullIt = std::wstring(displayName) + L" / " + realName;
         DWORD type = services[x].ServiceStatusProcess.dwServiceType;
+        DWORD status = services[x].ServiceStatusProcess.dwCurrentState;
+        QString status_conv = whichStatus(status);
 
-
+        SC_HANDLE db_handle = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
 
         QTreeWidgetItem* itemServices = new QTreeWidgetItem(ui->treeWidget_5);
         itemServices->setText(0, QString::fromStdWString(fullIt));
+        itemServices->setText(1, status_conv);
         itemServices->setText(2, QString::fromStdWString(GetServiceTypeString(type)));
 
-
     }
+
+
 
 }
 
