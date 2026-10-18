@@ -56,12 +56,12 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(1028, 444);
+        MainWindow->resize(1185, 444);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName("tabWidget");
-        tabWidget->setGeometry(QRect(0, 10, 1011, 711));
+        tabWidget->setGeometry(QRect(0, 10, 1181, 711));
         tab = new QWidget();
         tab->setObjectName("tab");
         label = new QLabel(tab);
@@ -111,7 +111,7 @@ public:
         QTableWidgetItem *__qtablewidgetitem16 = new QTableWidgetItem();
         tableWidget->setItem(0, 4, __qtablewidgetitem16);
         tableWidget->setObjectName("tableWidget");
-        tableWidget->setGeometry(QRect(10, 50, 991, 291));
+        tableWidget->setGeometry(QRect(10, 50, 1161, 291));
         tableWidget->setFont(font);
         tableWidget->setLineWidth(5);
         tableWidget->setMidLineWidth(0);
@@ -126,7 +126,7 @@ public:
         tab_2->setObjectName("tab_2");
         tableWidget_2 = new QTreeWidget(tab_2);
         tableWidget_2->setObjectName("tableWidget_2");
-        tableWidget_2->setGeometry(QRect(10, 10, 991, 331));
+        tableWidget_2->setGeometry(QRect(10, 10, 1161, 331));
         tableWidget_2->setColumnCount(3);
         tabWidget->addTab(tab_2, QString());
         tab_3 = new QWidget();
@@ -136,43 +136,43 @@ public:
         __qtreewidgetitem->setText(0, QString::fromUtf8("Process"));
         treeWidget->setHeaderItem(__qtreewidgetitem);
         treeWidget->setObjectName("treeWidget");
-        treeWidget->setGeometry(QRect(10, 10, 991, 331));
+        treeWidget->setGeometry(QRect(10, 10, 1161, 331));
         tabWidget->addTab(tab_3, QString());
         tab_4 = new QWidget();
         tab_4->setObjectName("tab_4");
         tabWidget_2 = new QTabWidget(tab_4);
         tabWidget_2->setObjectName("tabWidget_2");
-        tabWidget_2->setGeometry(QRect(0, 10, 1001, 341));
+        tabWidget_2->setGeometry(QRect(0, 10, 1171, 341));
         tab_7 = new QWidget();
         tab_7->setObjectName("tab_7");
         treeWidget_2 = new QTreeWidget(tab_7);
         treeWidget_2->setObjectName("treeWidget_2");
-        treeWidget_2->setGeometry(QRect(10, 10, 981, 291));
+        treeWidget_2->setGeometry(QRect(10, 10, 1151, 291));
         tabWidget_2->addTab(tab_7, QString());
         tab_8 = new QWidget();
         tab_8->setObjectName("tab_8");
         plainTextEdit = new QPlainTextEdit(tab_8);
         plainTextEdit->setObjectName("plainTextEdit");
-        plainTextEdit->setGeometry(QRect(10, 10, 981, 291));
+        plainTextEdit->setGeometry(QRect(10, 10, 1151, 291));
         tabWidget_2->addTab(tab_8, QString());
         tab_9 = new QWidget();
         tab_9->setObjectName("tab_9");
         treeWidget_3 = new QTreeWidget(tab_9);
         treeWidget_3->setObjectName("treeWidget_3");
-        treeWidget_3->setGeometry(QRect(10, 10, 981, 291));
+        treeWidget_3->setGeometry(QRect(10, 10, 1151, 291));
         tabWidget_2->addTab(tab_9, QString());
         tab_10 = new QWidget();
         tab_10->setObjectName("tab_10");
         treeWidget_4 = new QTreeWidget(tab_10);
         treeWidget_4->setObjectName("treeWidget_4");
-        treeWidget_4->setGeometry(QRect(0, 0, 991, 301));
+        treeWidget_4->setGeometry(QRect(0, 0, 1161, 301));
         tabWidget_2->addTab(tab_10, QString());
         tabWidget->addTab(tab_4, QString());
         tab_5 = new QWidget();
         tab_5->setObjectName("tab_5");
         treeWidget_5 = new QTreeWidget(tab_5);
         treeWidget_5->setObjectName("treeWidget_5");
-        treeWidget_5->setGeometry(QRect(0, 0, 1001, 331));
+        treeWidget_5->setGeometry(QRect(0, 0, 1181, 361));
         tabWidget->addTab(tab_5, QString());
         tab_6 = new QWidget();
         tab_6->setObjectName("tab_6");
@@ -180,7 +180,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 1028, 21));
+        menubar->setGeometry(QRect(0, 0, 1185, 21));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName("statusbar");
@@ -188,8 +188,8 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(0);
-        tabWidget_2->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(5);
+        tabWidget_2->setCurrentIndex(3);
 
 
         QMetaObject::connectSlotsByName(MainWindow);

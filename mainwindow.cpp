@@ -837,7 +837,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     SC_HANDLE scm_handle = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
     DWORD bytesNeeded = 0;
-    DWORD      resumeHandle;
+    DWORD      resumeHandle = 0;
     DWORD servicesReturned = 0;
 
 
@@ -866,18 +866,63 @@ MainWindow::MainWindow(QWidget *parent)
         DWORD status = services[x].ServiceStatusProcess.dwCurrentState;
         QString status_conv = whichStatus(status);
         char serviceNameANSI[3500];
+        QUERY_SERVICE_CONFIG service_configStr = {0};
+        QTreeWidgetItem* itemServices = new QTreeWidgetItem(ui->treeWidget_5);
+        itemServices->setText(0, QString::fromStdWString(fullIt));
+        itemServices->setText(1, status_conv);
+        itemServices->setText(2, QString::fromStdWString(GetServiceTypeString(type)));
+
         wcstombs(serviceNameANSI, services[x].lpServiceName, sizeof(serviceNameANSI));
 
         SC_HANDLE db_handle = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
 
         SC_HANDLE services_handle = OpenServiceA(db_handle, serviceNameANSI, SERVICE_QUERY_CONFIG);
 
+        DWORD bytesNeededQueryService = 0;
+        if (QueryServiceConfigA(services_handle, nullptr, 0, &bytesNeededQueryService) == 0)
+        {
+            std::vector<BYTE> bytesNeededStruct(bytesNeededQueryService);
+            auto queryServiceStructBuffer = reinterpret_cast<QUERY_SERVICE_CONFIGA*>(bytesNeededStruct.data());
+            QueryServiceConfigA(services_handle, queryServiceStructBuffer, bytesNeededQueryService, &bytesNeededQueryService);
+
+            switch (queryServiceStructBuffer->dwStartType){
+            case SERVICE_AUTO_START:
+                itemServices->setText(3, "SERVICE_AUTO_START");
+                break;
+            case SERVICE_BOOT_START:
+                itemServices->setText(3, "SERVICE_BOOT_START");
+                break;
+            case SERVICE_DEMAND_START:
+                itemServices->setText(3, "SERVICE_DEMAND_START");
+                break;
+            case SERVICE_DISABLED:
+                itemServices->setText(3, "SERVICE_DISABLED");
+                break;
+            case SERVICE_SYSTEM_START:
+                itemServices->setText(3, "SERVICE_SYSTEM_START");
+                break;
+            }
+
+            itemServices->setText(4, queryServiceStructBuffer->lpBinaryPathName ? QString::fromStdString(std::string(queryServiceStructBuffer->lpBinaryPathName)) : "-");
+            itemServices->setText(5, queryServiceStructBuffer->lpServiceStartName ? QString::fromStdString(std::string(queryServiceStructBuffer->lpServiceStartName)) : "-");
+
+            DWORD bytesForTwo = 0;
+            if (QueryServiceConfig2W(services_handle, SERVICE_CONFIG_DESCRIPTION,nullptr, 0, &bytesForTwo) == 0){
+
+                std::vector<BYTE> heapAllocated2(bytesForTwo);
+                auto descriptionBuffer = reinterpret_cast<SERVICE_DESCRIPTION*>(heapAllocated2.data());
+                QueryServiceConfig2W(services_handle, SERVICE_CONFIG_DESCRIPTION, heapAllocated2.data(), bytesForTwo, &bytesForTwo);
+                if (descriptionBuffer->lpDescription != nullptr){
+                    itemServices->setText(6, QString::fromStdWString(std::wstring(descriptionBuffer->lpDescription)));
+                }else{
+                    itemServices->setText(6, "-");
+                }
+            }
+        }
+
+        //Persistence next here
 
 
-        QTreeWidgetItem* itemServices = new QTreeWidgetItem(ui->treeWidget_5);
-        itemServices->setText(0, QString::fromStdWString(fullIt));
-        itemServices->setText(1, status_conv);
-        itemServices->setText(2, QString::fromStdWString(GetServiceTypeString(type)));
 
     }
 
