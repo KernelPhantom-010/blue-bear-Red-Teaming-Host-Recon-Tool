@@ -547,102 +547,109 @@ MainWindow::MainWindow(QWidget *parent)
             continue;
         }
 
-        HANDLE tokenHandle;
+        HANDLE tokenHandle = nullptr;;
 
-        OpenProcessToken(procH, TOKEN_QUERY, &tokenHandle);
+        if (OpenProcessToken(procH, TOKEN_QUERY, &tokenHandle)){
+            if (tokenHandle != INVALID_HANDLE_VALUE){
+                retLength = 0;
+                GetTokenInformation(tokenHandle, TokenPrivileges, nullptr, 0, &retLength);
+                std::vector<BYTE> privBuf(retLength);
+                TOKEN_PRIVILEGES* privStruct = reinterpret_cast<TOKEN_PRIVILEGES*>(privBuf.data());
+                BOOL ret1 = GetTokenInformation(tokenHandle, TokenPrivileges, privStruct, retLength, &retLength);
 
-        if (tokenHandle != INVALID_HANDLE_VALUE){
-            retLength = 0;
-            GetTokenInformation(tokenHandle, TokenPrivileges, nullptr, 0, &retLength);
-            std::vector<BYTE> privBuf(retLength);
-            TOKEN_PRIVILEGES* privStruct = reinterpret_cast<TOKEN_PRIVILEGES*>(privBuf.data());
-            BOOL ret1 = GetTokenInformation(tokenHandle, TokenPrivileges, privStruct, retLength, &retLength);
-            //SET :)
+                //SET :)
 
-            retLength = 0;
-            GetTokenInformation(tokenHandle, TokenUser, nullptr, 0, &retLength);
-            std::vector<BYTE> userBuf(retLength);
-            TOKEN_USER* userStruct = reinterpret_cast<TOKEN_USER*>(userBuf.data());
-            BOOL ret2 = GetTokenInformation(tokenHandle, TokenUser, userStruct, retLength, &retLength);
-
-
-            retLength = 0;
-            GetTokenInformation(tokenHandle, TokenIntegrityLevel, nullptr, 0, &retLength);
-            std::vector<BYTE> intBuf(retLength);
-            TOKEN_MANDATORY_LABEL* integrityStruct = reinterpret_cast<TOKEN_MANDATORY_LABEL*>(intBuf.data());
-            BOOL ret3 = GetTokenInformation(tokenHandle, TokenIntegrityLevel, integrityStruct, retLength, &retLength);
-
-
-            TOKEN_ELEVATION elevStruct = {0};
-            DWORD elevLen = sizeof(TOKEN_ELEVATION);
-            BOOL ret4 = GetTokenInformation(tokenHandle, TokenElevation, &elevStruct, elevLen, &elevLen);
-
-            LUID luidImpersonate = {0};
-            LUID luidDebug = {0};
-            LookupPrivilegeValueW(NULL, SE_IMPERSONATE_NAME, &luidImpersonate);
-            LookupPrivilegeValueW(NULL, SE_DEBUG_NAME, &luidDebug);
-            bool hasImpersonate = false;
-            bool hasDebug = false;
-            for (DWORD j = 0; j < privStruct->PrivilegeCount; ++j){
-
-                LUID localLuid = privStruct->Privileges[j].Luid;
-                DWORD attr = privStruct->Privileges[j].Attributes;
-
-                if (localLuid.LowPart == luidImpersonate.LowPart && localLuid.HighPart == luidImpersonate.HighPart){
-                    hasImpersonate = (attr & SE_PRIVILEGE_ENABLED) != 0;
+                retLength = 0;
+                GetTokenInformation(tokenHandle, TokenUser, nullptr, 0, &retLength);
+                std::vector<BYTE> userBuf(retLength);
+                TOKEN_USER* userStruct = reinterpret_cast<TOKEN_USER*>(userBuf.data());
+                BOOL ret2 = GetTokenInformation(tokenHandle, TokenUser, userStruct, retLength, &retLength);
+                if (!ret1 || !ret2 || privBuf.empty() || userBuf.empty()){
+                    CloseHandle(tokenHandle);
+                    continue;
                 }
-                if (localLuid.LowPart == luidDebug.LowPart && localLuid.HighPart == luidDebug.HighPart){
-                    hasDebug = (attr & SE_PRIVILEGE_ENABLED) != 0;
+
+
+                retLength = 0;
+                GetTokenInformation(tokenHandle, TokenIntegrityLevel, nullptr, 0, &retLength);
+                std::vector<BYTE> intBuf(retLength);
+                TOKEN_MANDATORY_LABEL* integrityStruct = reinterpret_cast<TOKEN_MANDATORY_LABEL*>(intBuf.data());
+                BOOL ret3 = GetTokenInformation(tokenHandle, TokenIntegrityLevel, integrityStruct, retLength, &retLength);
+
+
+                TOKEN_ELEVATION elevStruct = {0};
+                DWORD elevLen = sizeof(TOKEN_ELEVATION);
+                BOOL ret4 = GetTokenInformation(tokenHandle, TokenElevation, &elevStruct, elevLen, &elevLen);
+
+                LUID luidImpersonate = {0};
+                LUID luidDebug = {0};
+                LookupPrivilegeValueW(NULL, SE_IMPERSONATE_NAME, &luidImpersonate);
+                LookupPrivilegeValueW(NULL, SE_DEBUG_NAME, &luidDebug);
+                bool hasImpersonate = false;
+                bool hasDebug = false;
+                for (DWORD j = 0; j < privStruct->PrivilegeCount; ++j){
+
+                    LUID localLuid = privStruct->Privileges[j].Luid;
+                    DWORD attr = privStruct->Privileges[j].Attributes;
+
+                    if (localLuid.LowPart == luidImpersonate.LowPart && localLuid.HighPart == luidImpersonate.HighPart){
+                        hasImpersonate = (attr & SE_PRIVILEGE_ENABLED) != 0;
+                    }
+                    if (localLuid.LowPart == luidDebug.LowPart && localLuid.HighPart == luidDebug.HighPart){
+                        hasDebug = (attr & SE_PRIVILEGE_ENABLED) != 0;
+                    }
                 }
+
+                char szName[256] = {0};
+                char szDomain[256] = {0};
+                DWORD cchName = 256, cchDomain = 256;
+                SID_NAME_USE snu;
+                char fullOwner[6000] = {0};
+
+                if (LookupAccountSidA(NULL, userStruct->User.Sid, szName, &cchName, szDomain, &cchDomain, &snu)){
+                    snprintf(fullOwner, sizeof(fullOwner), "%s/%s", szName, szDomain);
+                }
+
+                std::string fullOwnerStdStr = fullOwner;
+
+                QString hasImpersonateInsert = "FALSE";
+                QString hasDebugInsert = "FALSE";
+
+                if (hasImpersonate){
+                    hasImpersonateInsert = "TRUE";
+                }
+                if (hasDebug){
+                    hasDebugInsert = "TRUE";
+                }
+                QString integrityLevel = "Unknown";
+                if (ret3){
+                    DWORD level = *GetSidSubAuthority(integrityStruct->Label.Sid, *GetSidSubAuthorityCount(integrityStruct->Label.Sid) - 1);
+                    if      (level < SECURITY_MANDATORY_MEDIUM_RID) integrityLevel = "Low";
+                    else if (level < SECURITY_MANDATORY_HIGH_RID)   integrityLevel = "Medium";
+                    else if (level < SECURITY_MANDATORY_SYSTEM_RID) integrityLevel = "High";
+                    else                                             integrityLevel = "System";
+                }
+                QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget);
+                item->setText(0, QString::fromStdString(processNames[i]));
+                QTreeWidgetItem* item2 = new QTreeWidgetItem(ui->treeWidget_2);
+                item2->setText(5, QString::fromStdString(processNames[i]));
+                item2->setText(6, QString::fromStdString(std::to_string(pids[i])));
+                item->setText(1, QString::fromStdString(std::to_string(pids[i])));
+                item->setText(2, hasImpersonateInsert);
+                item->setText(3, hasDebugInsert);
+                item->setText(4, QString::fromStdString(fullOwnerStdStr));
+                item->setText(5, integrityLevel);
+
+
+
+
+
+                CloseHandle(procH);
+                CloseHandle(tokenHandle);
             }
-
-            char szName[256] = {0};
-            char szDomain[256] = {0};
-            DWORD cchName = 256, cchDomain = 256;
-            SID_NAME_USE snu;
-            char fullOwner[6000];
-
-            if (LookupAccountSidA(NULL, userStruct->User.Sid, szName, &cchName, szDomain, &cchDomain, &snu)){
-                snprintf(fullOwner, sizeof(fullOwner), "%s/%s", szName, szDomain);
-            }
-
-            std::string fullOwnerStdStr = fullOwner;
-
-            QString hasImpersonateInsert = "FALSE";
-            QString hasDebugInsert = "FALSE";
-
-            if (hasImpersonate){
-                hasImpersonateInsert = "TRUE";
-            }
-            if (hasDebug){
-                hasDebugInsert = "TRUE";
-            }
-            QString integrityLevel = "Unknown";
-            if (ret3){
-                DWORD level = *GetSidSubAuthority(integrityStruct->Label.Sid, *GetSidSubAuthorityCount(integrityStruct->Label.Sid) - 1);
-                if      (level < SECURITY_MANDATORY_MEDIUM_RID) integrityLevel = "Low";
-                else if (level < SECURITY_MANDATORY_HIGH_RID)   integrityLevel = "Medium";
-                else if (level < SECURITY_MANDATORY_SYSTEM_RID) integrityLevel = "High";
-                else                                             integrityLevel = "System";
-            }
-            QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget);
-            item->setText(0, QString::fromStdString(processNames[i]));
-            QTreeWidgetItem* item2 = new QTreeWidgetItem(ui->treeWidget_2);
-            item2->setText(5, QString::fromStdString(processNames[i]));
-            item2->setText(6, QString::fromStdString(std::to_string(pids[i])));
-            item->setText(1, QString::fromStdString(std::to_string(pids[i])));
-            item->setText(2, hasImpersonateInsert);
-            item->setText(3, hasDebugInsert);
-            item->setText(4, QString::fromStdString(fullOwnerStdStr));
-            item->setText(5, integrityLevel);
-
-
-
-
-
-            CloseHandle(procH);
-            CloseHandle(tokenHandle);
         }
+
+
 
         //Network Discovery
 
@@ -877,47 +884,51 @@ MainWindow::MainWindow(QWidget *parent)
         SC_HANDLE db_handle = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
 
         SC_HANDLE services_handle = OpenServiceA(db_handle, serviceNameANSI, SERVICE_QUERY_CONFIG);
+        if (services_handle != NULL){
+            DWORD bytesNeededQueryService = 0;
+            if (QueryServiceConfigA(services_handle, nullptr, 0, &bytesNeededQueryService) == 0)
+            {
+                std::vector<BYTE> bytesNeededStruct(bytesNeededQueryService);
+                auto queryServiceStructBuffer = reinterpret_cast<QUERY_SERVICE_CONFIGA*>(bytesNeededStruct.data());
+                QueryServiceConfigA(services_handle, queryServiceStructBuffer, bytesNeededQueryService, &bytesNeededQueryService);
 
-        DWORD bytesNeededQueryService = 0;
-        if (QueryServiceConfigA(services_handle, nullptr, 0, &bytesNeededQueryService) == 0)
-        {
-            std::vector<BYTE> bytesNeededStruct(bytesNeededQueryService);
-            auto queryServiceStructBuffer = reinterpret_cast<QUERY_SERVICE_CONFIGA*>(bytesNeededStruct.data());
-            QueryServiceConfigA(services_handle, queryServiceStructBuffer, bytesNeededQueryService, &bytesNeededQueryService);
-
-            switch (queryServiceStructBuffer->dwStartType){
-            case SERVICE_AUTO_START:
-                itemServices->setText(3, "SERVICE_AUTO_START");
-                break;
-            case SERVICE_BOOT_START:
-                itemServices->setText(3, "SERVICE_BOOT_START");
-                break;
-            case SERVICE_DEMAND_START:
-                itemServices->setText(3, "SERVICE_DEMAND_START");
-                break;
-            case SERVICE_DISABLED:
-                itemServices->setText(3, "SERVICE_DISABLED");
-                break;
-            case SERVICE_SYSTEM_START:
-                itemServices->setText(3, "SERVICE_SYSTEM_START");
-                break;
-            }
-
-            itemServices->setText(4, queryServiceStructBuffer->lpBinaryPathName ? QString::fromStdString(std::string(queryServiceStructBuffer->lpBinaryPathName)) : "-");
-            itemServices->setText(5, queryServiceStructBuffer->lpServiceStartName ? QString::fromStdString(std::string(queryServiceStructBuffer->lpServiceStartName)) : "-");
-
-            DWORD bytesForTwo = 0;
-            if (QueryServiceConfig2W(services_handle, SERVICE_CONFIG_DESCRIPTION,nullptr, 0, &bytesForTwo) == 0){
-
-                std::vector<BYTE> heapAllocated2(bytesForTwo);
-                auto descriptionBuffer = reinterpret_cast<SERVICE_DESCRIPTION*>(heapAllocated2.data());
-                QueryServiceConfig2W(services_handle, SERVICE_CONFIG_DESCRIPTION, heapAllocated2.data(), bytesForTwo, &bytesForTwo);
-                if (descriptionBuffer->lpDescription != nullptr){
-                    itemServices->setText(6, QString::fromStdWString(std::wstring(descriptionBuffer->lpDescription)));
-                }else{
-                    itemServices->setText(6, "-");
+                switch (queryServiceStructBuffer->dwStartType){
+                case SERVICE_AUTO_START:
+                    itemServices->setText(3, "SERVICE_AUTO_START");
+                    break;
+                case SERVICE_BOOT_START:
+                    itemServices->setText(3, "SERVICE_BOOT_START");
+                    break;
+                case SERVICE_DEMAND_START:
+                    itemServices->setText(3, "SERVICE_DEMAND_START");
+                    break;
+                case SERVICE_DISABLED:
+                    itemServices->setText(3, "SERVICE_DISABLED");
+                    break;
+                case SERVICE_SYSTEM_START:
+                    itemServices->setText(3, "SERVICE_SYSTEM_START");
+                    break;
                 }
+
+                itemServices->setText(4, queryServiceStructBuffer->lpBinaryPathName ? QString::fromStdString(std::string(queryServiceStructBuffer->lpBinaryPathName)) : "-");
+                itemServices->setText(5, queryServiceStructBuffer->lpServiceStartName ? QString::fromStdString(std::string(queryServiceStructBuffer->lpServiceStartName)) : "-");
+
+                DWORD bytesForTwo = 0;
+                if (QueryServiceConfig2W(services_handle, SERVICE_CONFIG_DESCRIPTION,nullptr, 0, &bytesForTwo) == 0){
+
+                    std::vector<BYTE> heapAllocated2(bytesForTwo);
+                    auto descriptionBuffer = reinterpret_cast<SERVICE_DESCRIPTION*>(heapAllocated2.data());
+                    QueryServiceConfig2W(services_handle, SERVICE_CONFIG_DESCRIPTION, heapAllocated2.data(), bytesForTwo, &bytesForTwo);
+                    if (descriptionBuffer->lpDescription != nullptr){
+                        itemServices->setText(6, QString::fromStdWString(std::wstring(descriptionBuffer->lpDescription)));
+                    }else{
+                        itemServices->setText(6, "-");
+                    }
+                }
+                CloseServiceHandle(services_handle);
             }
+            CloseServiceHandle(db_handle);
+
         }
 
 
@@ -929,93 +940,109 @@ MainWindow::MainWindow(QWidget *parent)
     //Persistence next here
     //1. Run Keys
     HKEY runKeyHandle;
-    RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, 0x20019, &runKeyHandle);
+    std::vector<QTreeWidgetItem*> runKeyItems;
+    LONG openResult =  RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_READ, &runKeyHandle);
     int countr = 0;
     bool showedWarning = false;
-    while (true){
+    if (openResult == ERROR_SUCCESS){
+        while (true){
 
-        WCHAR valueName[256];
-        DWORD valueNameSize = 256;
-        WCHAR dataRet[1024];
-        DWORD dataRetSize = 0;
-        DWORD type = 0;
+            WCHAR valueName[2560];
+            DWORD valueNameSize = 256;
+            WCHAR dataRet[10240] = {0};
+            DWORD dataRetSize = sizeof(dataRet);
+            DWORD type = 0;
 
-        LONG retValues = RegEnumValueW(
-            runKeyHandle,
-            countr,
-            valueName,
-            &valueNameSize,
-            nullptr,
-            &type,
-            reinterpret_cast<LPBYTE>(dataRet),
-            &dataRetSize
-            );
+            LONG retValues = RegEnumValueW(
+                runKeyHandle,
+                countr,
+                valueName,
+                &valueNameSize,
+                nullptr,
+                &type,
+                reinterpret_cast<LPBYTE>(dataRet),
+                &dataRetSize
+                );
 
-        if (retValues == ERROR_NO_MORE_ITEMS){
-            break;
+            if (retValues == ERROR_NO_MORE_ITEMS){
+                break;
+            }
+
+            if (retValues != ERROR_SUCCESS && !showedWarning){
+                MessageBoxA(NULL, "Couldn't obtain all Run-Key entries\nfor some Users", "Warning", NULL);
+                showedWarning = true;
+            }
+
+            std::wstring valuePathAllUsers = dataRet;
+            std::wstring entryName(valueName, valueNameSize);
+
+            QTreeWidgetItem *itemLast = new QTreeWidgetItem(ui->treeWidget_6);
+            itemLast->setText(0, QString::fromStdWString(entryName));
+            itemLast->setToolTip(0, QString::fromStdWString(valuePathAllUsers));
+            runKeyItems.push_back(itemLast);
+            countr++;
+
         }
-
-        if (retValues != ERROR_SUCCESS && !showedWarning){
-            MessageBoxA(NULL, "Couldn't obtain all Run-Key entries\nfor some Users", "Warning", NULL);
-            showedWarning = true;
-        }
-
-        std::wstring valuePathAllUsers = dataRet;
-        QTreeWidgetItem *itemLast = new QTreeWidgetItem(ui->treeWidget_6);
-
-        itemLast->setText(0, QString::fromStdWString(valuePathAllUsers));
-
-        countr++;
-
+        RegCloseKey(runKeyHandle);
+    }else{
+        MessageBoxA(NULL, "Run-Key Lookup for all users failed", "Warning", MB_OK);
     }
 
-    RegCloseKey(runKeyHandle);
+
+
 
     HKEY runKeyHandle2;
-    RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, 0x20019, &runKeyHandle2);
+    LONG openResult2 = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_READ, &runKeyHandle2);
     int countr2 = 0;
+    if (openResult2 == ERROR_SUCCESS){
+        while (true){
 
-    while (true){
+            WCHAR valueName[2560];
+            DWORD valueNameSize = 256;
+            WCHAR dataRet[10240] = {0};
+            DWORD dataRetSize = sizeof(dataRet);
+            DWORD type = 0;
 
-        WCHAR valueName[256];
-        DWORD valueNameSize = 256;
-        WCHAR dataRet[1024];
-        DWORD dataRetSize = 0;
-        DWORD type = 0;
+            LONG retValues = RegEnumValueW(
+                runKeyHandle2,
+                countr2,
+                valueName,
+                &valueNameSize,
+                nullptr,
+                &type,
+                reinterpret_cast<LPBYTE>(dataRet),
+                &dataRetSize
+                );
 
-        LONG retValues = RegEnumValueW(
-            runKeyHandle,
-            countr2,
-            valueName,
-            &valueNameSize,
-            nullptr,
-            &type,
-            reinterpret_cast<LPBYTE>(dataRet),
-            &dataRetSize
-            );
+            if (retValues == ERROR_NO_MORE_ITEMS){
+                break;
+            }
 
-        if (retValues == ERROR_NO_MORE_ITEMS){
-            break;
+            if (retValues != ERROR_SUCCESS && !showedWarning){
+                MessageBoxA(NULL, "Couldn't obtain all Run-Key entries\nfor some Users", "Warning", NULL);
+                showedWarning = true;
+            }
+
+            std::wstring valuePathAllUsers = dataRet;
+            std::wstring entryName(valueName, valueNameSize);
+
+            if (countr2 < (int)runKeyItems.size()){
+                runKeyItems[countr2]->setText(1, QString::fromStdWString(entryName));
+                runKeyItems[countr2]->setToolTip(1, QString::fromStdWString(valuePathAllUsers));
+            } else {
+                QTreeWidgetItem *itemLast = new QTreeWidgetItem(ui->treeWidget_6);
+                itemLast->setText(1, QString::fromStdWString(entryName));
+                itemLast->setToolTip(1, QString::fromStdWString(valuePathAllUsers));
+            }
+            countr2++;
+
         }
-
-        if (retValues != ERROR_SUCCESS && !showedWarning){
-            MessageBoxA(NULL, "Couldn't obtain all Run-Key entries\nfor some Users", "Warning", NULL);
-            showedWarning = true;
-        }
-
-        std::wstring valuePathAllUsers = dataRet;
-        QTreeWidgetItem *itemLast = new QTreeWidgetItem(ui->treeWidget_6);
-
-        itemLast->setText(1, QString::fromStdWString(valuePathAllUsers));
-
-        countr2++;
+        RegCloseKey(runKeyHandle2);
 
     }
-
-
-
-
-
+    else{
+        MessageBoxA(NULL, "Run-Key Lookup for all users failed", "Warning", MB_OK);
+    }
 
 }
 
