@@ -923,7 +923,39 @@ MainWindow::MainWindow(QWidget *parent)
         //Persistence next here
         //1. Run Keys
         HKEY runKeyHandle;
-        RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"HKLM/HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, 0x20019, &runKeyHandle);
+        RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, 0x20019, &runKeyHandle);
+        int countr = 0;
+
+        while (true){
+
+            WCHAR valueName[256];
+            DWORD valueNameSize = 256;
+
+            DWORD dataRetSize = 0;
+            DWORD type = 0;
+
+            LONG retValues = RegEnumValueW(
+                runKeyHandle,
+                countr,
+                valueName,
+                &valueNameSize,
+                NULL,
+                &type,
+                NULL,
+                &dataRetSize
+                );
+
+            if (retValues == ERROR_NO_MORE_ITEMS){
+                break;
+            }
+
+            if (retValues != ERROR_SUCCESS){
+                MessageBoxA(NULL, "Couldn't obtain all Run-Key entries", "Warning", NULL);
+            }
+
+            countr++;
+
+        }
 
 
 
