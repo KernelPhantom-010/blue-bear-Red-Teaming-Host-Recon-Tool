@@ -921,6 +921,10 @@ MainWindow::MainWindow(QWidget *parent)
         }
 
         //Persistence next here
+        //1. Run Keys
+        HKEY runKeyHandle;
+        RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"HKLM/HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, 0x20019, &runKeyHandle);
+
 
 
 
