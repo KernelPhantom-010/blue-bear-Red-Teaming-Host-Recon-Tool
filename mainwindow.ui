@@ -460,6 +460,41 @@
      <attribute name="title">
       <string>Persistence</string>
      </attribute>
+     <widget class="QTreeWidget" name="treeWidget_6">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1171</width>
+        <height>371</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>Run-Keys (all Users)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Run-Keys (current User)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Scheduled Tasks</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Startup Folder</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>WMI Event Subscriptions</string>
+       </property>
+      </column>
+     </widget>
     </widget>
    </widget>
   </widget>

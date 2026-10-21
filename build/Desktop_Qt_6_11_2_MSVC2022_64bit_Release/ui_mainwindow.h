@@ -49,6 +49,7 @@ public:
     QWidget *tab_5;
     QTreeWidget *treeWidget_5;
     QWidget *tab_6;
+    QTreeWidget *treeWidget_6;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -176,6 +177,9 @@ public:
         tabWidget->addTab(tab_5, QString());
         tab_6 = new QWidget();
         tab_6->setObjectName("tab_6");
+        treeWidget_6 = new QTreeWidget(tab_6);
+        treeWidget_6->setObjectName("treeWidget_6");
+        treeWidget_6->setGeometry(QRect(0, 0, 1171, 371));
         tabWidget->addTab(tab_6, QString());
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
@@ -269,6 +273,12 @@ public:
         ___qtreewidgetitem5->setText(1, QCoreApplication::translate("MainWindow", "Status", nullptr));
         ___qtreewidgetitem5->setText(0, QCoreApplication::translate("MainWindow", "Name / DisplayName", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_5), QCoreApplication::translate("MainWindow", "Service Discovery", nullptr));
+        QTreeWidgetItem *___qtreewidgetitem6 = treeWidget_6->headerItem();
+        ___qtreewidgetitem6->setText(4, QCoreApplication::translate("MainWindow", "WMI Event Subscriptions", nullptr));
+        ___qtreewidgetitem6->setText(3, QCoreApplication::translate("MainWindow", "Startup Folder", nullptr));
+        ___qtreewidgetitem6->setText(2, QCoreApplication::translate("MainWindow", "Scheduled Tasks", nullptr));
+        ___qtreewidgetitem6->setText(1, QCoreApplication::translate("MainWindow", "Run-Keys (current User)", nullptr));
+        ___qtreewidgetitem6->setText(0, QCoreApplication::translate("MainWindow", "Run-Keys (all Users)", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_6), QCoreApplication::translate("MainWindow", "Persistence", nullptr));
     } // retranslateUi
 

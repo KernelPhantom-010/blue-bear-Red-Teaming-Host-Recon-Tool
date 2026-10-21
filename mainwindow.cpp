@@ -920,47 +920,100 @@ MainWindow::MainWindow(QWidget *parent)
             }
         }
 
-        //Persistence next here
-        //1. Run Keys
-        HKEY runKeyHandle;
-        RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, 0x20019, &runKeyHandle);
-        int countr = 0;
-
-        while (true){
-
-            WCHAR valueName[256];
-            DWORD valueNameSize = 256;
-
-            DWORD dataRetSize = 0;
-            DWORD type = 0;
-
-            LONG retValues = RegEnumValueW(
-                runKeyHandle,
-                countr,
-                valueName,
-                &valueNameSize,
-                NULL,
-                &type,
-                NULL,
-                &dataRetSize
-                );
-
-            if (retValues == ERROR_NO_MORE_ITEMS){
-                break;
-            }
-
-            if (retValues != ERROR_SUCCESS){
-                MessageBoxA(NULL, "Couldn't obtain all Run-Key entries", "Warning", NULL);
-            }
-
-            countr++;
-
-        }
 
 
 
 
     }
+
+    //Persistence next here
+    //1. Run Keys
+    HKEY runKeyHandle;
+    RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, 0x20019, &runKeyHandle);
+    int countr = 0;
+    bool showedWarning = false;
+    while (true){
+
+        WCHAR valueName[256];
+        DWORD valueNameSize = 256;
+        WCHAR dataRet[1024];
+        DWORD dataRetSize = 0;
+        DWORD type = 0;
+
+        LONG retValues = RegEnumValueW(
+            runKeyHandle,
+            countr,
+            valueName,
+            &valueNameSize,
+            nullptr,
+            &type,
+            reinterpret_cast<LPBYTE>(dataRet),
+            &dataRetSize
+            );
+
+        if (retValues == ERROR_NO_MORE_ITEMS){
+            break;
+        }
+
+        if (retValues != ERROR_SUCCESS && !showedWarning){
+            MessageBoxA(NULL, "Couldn't obtain all Run-Key entries\nfor some Users", "Warning", NULL);
+            showedWarning = true;
+        }
+
+        std::wstring valuePathAllUsers = dataRet;
+        QTreeWidgetItem *itemLast = new QTreeWidgetItem(ui->treeWidget_6);
+
+        itemLast->setText(0, QString::fromStdWString(valuePathAllUsers));
+
+        countr++;
+
+    }
+
+    RegCloseKey(runKeyHandle);
+
+    HKEY runKeyHandle2;
+    RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, 0x20019, &runKeyHandle2);
+    int countr2 = 0;
+
+    while (true){
+
+        WCHAR valueName[256];
+        DWORD valueNameSize = 256;
+        WCHAR dataRet[1024];
+        DWORD dataRetSize = 0;
+        DWORD type = 0;
+
+        LONG retValues = RegEnumValueW(
+            runKeyHandle,
+            countr2,
+            valueName,
+            &valueNameSize,
+            nullptr,
+            &type,
+            reinterpret_cast<LPBYTE>(dataRet),
+            &dataRetSize
+            );
+
+        if (retValues == ERROR_NO_MORE_ITEMS){
+            break;
+        }
+
+        if (retValues != ERROR_SUCCESS && !showedWarning){
+            MessageBoxA(NULL, "Couldn't obtain all Run-Key entries\nfor some Users", "Warning", NULL);
+            showedWarning = true;
+        }
+
+        std::wstring valuePathAllUsers = dataRet;
+        QTreeWidgetItem *itemLast = new QTreeWidgetItem(ui->treeWidget_6);
+
+        itemLast->setText(1, QString::fromStdWString(valuePathAllUsers));
+
+        countr2++;
+
+    }
+
+
+
 
 
 
