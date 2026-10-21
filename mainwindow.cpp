@@ -14,12 +14,14 @@
 #include <DSRole.h>
 #include <lmapibuf.h>
 #include <netioapi.h>
+#include <taskschd.h>
 #include "mainwindow.h"
 #include <iphlpapi.h>
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <thread>
 #pragma comment(lib, "User32.lib")
+#pragma comment(lib, "taskschd.lib")
 #pragma comment(lib, "Kernel32.lib")
 #pragma comment(lib, "Netapi32.lib")
 #pragma comment(lib, "Advapi32.lib")
@@ -1043,6 +1045,22 @@ MainWindow::MainWindow(QWidget *parent)
     else{
         MessageBoxA(NULL, "Run-Key Lookup for all users failed", "Warning", MB_OK);
     }
+
+    //Schedules Tasks
+
+
+    HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+
+    if (FAILED(hr)) {
+        MessageBoxA(NULL, "Cannot initialize COM", "Warning", MB_OK);
+    }
+
+    //CoCreateInstance();
+
+
+
+
+
 
 }
 
