@@ -8,6 +8,7 @@ LIBS += -lNetapi32
 
 LIBS += -lWldap32
 LIBS += -lws2_32
+LIBS += -lole32
 SOURCES += \
     main.cpp \
     mainwindow.cpp

@@ -943,7 +943,7 @@ MainWindow::MainWindow(QWidget *parent)
     //1. Run Keys
     HKEY runKeyHandle;
     std::vector<QTreeWidgetItem*> runKeyItems;
-    LONG openResult =  RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_READ, &runKeyHandle);
+    LONG openResult = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_READ, &runKeyHandle);
     int countr = 0;
     bool showedWarning = false;
     if (openResult == ERROR_SUCCESS){
@@ -1047,6 +1047,9 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     //Schedules Tasks
+
+
+
 
 
     HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
