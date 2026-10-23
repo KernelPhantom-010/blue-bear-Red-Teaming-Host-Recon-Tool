@@ -1,64 +1,90 @@
 <p align="center">
+  <img src="screenshots/screenshot.png" alt="Blue Bear Screenshot" width="900"/>
+</p>
+
+<p align="center">
   <img src="images/logo.png" alt="Blue Bear Logo" width="140"/>
 </p>
 
 # Blue Bear — Red Teaming Host Recon Tool
 
-A Windows-based reconnaissance tool for red team operations and security assessments. Blue Bear provides a structured dashboard for enumerating host information, running processes, loaded modules, tokens, and more — all from a single GUI.
+A Windows-based reconnaissance tool for red team operations and security assessments. Blue Bear gives you a clean, purple-themed dashboard to enumerate everything relevant about a target host — processes, tokens, network, services, and persistence — all in one place.
 
-> ⚠️ **For authorized security testing and educational purposes only. Do not use on systems you do not own or have explicit written permission to test! The author is not responsible for any misuse, but this warning should make clear to people, that this Project is only focused on ethical penetration testing/recon. ITS STILL UNDER DEVELOPMENT!**
+> ⚠️ **For authorized security testing and educational purposes only. Do not use on systems you do not own or have explicit written permission to test. The author is not responsible for any misuse. IT'S STILL UNDER DEVELOPMENT!**
 
 ---
 
 ## Features
 
 ### 🖥️ Host
-Displays general system information about the target host:
-- **Computer Name**
-- **OS Version** — Windows 10/11 with exact build number (via `RtlGetVersion`)
-- **Architecture** — x64, x86, ARM64
-- **Domain / Workgroup** — retrieved via `DsRoleGetPrimaryDomainInformation`
-- **Domain Users** — enumerated via LDAP with `ldap_search_sW` (requires domain connectivity)
-- **System Uptime** — live ticker (HH:MM:SS)
+A quick overview of the target system at a glance:
+- Computer name
+- OS version — Windows 10/11 with exact build number
+- Architecture — x64, x86, ARM64
+- Domain or workgroup membership
+- Domain users (requires domain connectivity)
+- Live system uptime ticker
 
 ---
 
 ### 🔍 Process Discovery
-Enumerates all running processes on the system:
+A full view of everything running on the system:
 - Process name and PID
-- All loaded DLLs per process via `CreateToolhelp32Snapshot` (expandable tree)
-- Graceful handling of protected processes (`Access denied`)
-- Requires **administrator privileges** for full module enumeration
-- Uses `SeDebugPrivilege` escalation automatically if available
+- All loaded DLLs per process in an expandable tree
+- Protected processes are flagged automatically
+- Requires **administrator privileges** for full enumeration
 
 ---
 
-### 🪙 Token Discovery *(in development)*
-Planned enumeration of security tokens across all running processes:
-- **SeImpersonatePrivilege** — identifies processes vulnerable to token impersonation attacks (Potato-style privesc)
-- **SeDebugPrivilege** — identifies processes capable of attaching to arbitrary processes (e.g. lsass)
-- **Token Owner** — resolves the user account behind each token
+### 🪙 Token Discovery
+Identify privilege escalation paths at a glance:
+- **SeImpersonatePrivilege** — flags processes vulnerable to Potato-style token impersonation
+- **SeDebugPrivilege** — flags processes that can attach to arbitrary processes (e.g. LSASS)
+- **Token Owner** — the user account behind each process token
 - **Integrity Level** — Low / Medium / High / System
-- **Elevated** — whether the token is a full admin token or a filtered one
+- **Token Elevation** — full admin token vs. filtered UAC token
 
 ---
 
-### 🌐 Network Discovery *(planned)*
+### 🌐 Network Discovery
+Four dedicated views covering the full network picture:
+
+**TCP Connections** — all active and listening connections with local/remote address, port, state, and owning process
+
+**Routing Table** — destination prefixes, subnet lengths, gateways, and route metrics
+
+**Network Adapters** — adapter name, description, operational status, and IP address
+
+**DNS Cache** — a full dump of the local DNS client cache
 
 ---
 
-### ⚙️ Service Discovery *(planned)*
+### ⚙️ Service Discovery
+A complete picture of everything installed as a service or driver:
+- Display name and internal service name
+- Current state (Running, Stopped, Paused, etc.)
+- Service type (Kernel Driver, Win32 Own Process, Shared Process, etc.)
+- Start type (Automatic, Manual, Disabled, etc.)
+- Binary path and the account the service runs under
+- Service description
 
 ---
 
-### 📌 Persistence *(planned)*
+### 📌 Persistence
+Surfaces the most common persistence locations:
+
+**Run Keys** — autorun entries for all users and the current user, with full executable paths on hover
+
+**Scheduled Tasks** — full task enumeration including hidden tasks
+
+**Startup Folder** *(in development)*
 
 ---
 
 ## Requirements
 
 - Windows 10 / Windows 11
-- **Administrator privileges** (required for full process and token enumeration)
+- **Administrator privileges** (required for full enumeration)
 - MSVC 2022 runtime
 - Qt 6.x runtime (bundled via `windeployqt`)
 
@@ -88,17 +114,6 @@ After building, run `windeployqt` to bundle the Qt DLLs:
 ```
 windeployqt BlueBear.exe
 ```
-
----
-
-## Libraries / APIs used
-
-- `Windows.h`, `TlHelp32.h` — process and module enumeration
-- `Winldap.h` / `Wldap32.lib` — LDAP domain user enumeration
-- `DSRole.h`, `DsGetDcName` — domain role and DC discovery
-- `Ntdll.dll` / `RtlGetVersion` — accurate OS version detection
-- `Advapi32.lib` — token and privilege APIs
-- Qt 6 — GUI framework (QMainWindow, QTreeWidget, QTimer)
 
 ---
 
