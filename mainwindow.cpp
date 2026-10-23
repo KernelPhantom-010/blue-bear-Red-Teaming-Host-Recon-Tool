@@ -1057,8 +1057,9 @@ MainWindow::MainWindow(QWidget *parent)
     if (FAILED(hr)) {
         MessageBoxA(NULL, "Cannot initialize COM", "Warning", MB_OK);
     }
+    ITaskService* pService = nullptr;
+    CoCreateInstance(CLSID_TaskScheduler, nullptr, CLSCTX_INPROC_SERVER, IID_ITaskService, reinterpret_cast<void**>(&pService));
 
-    //CoCreateInstance();
 
 
 
