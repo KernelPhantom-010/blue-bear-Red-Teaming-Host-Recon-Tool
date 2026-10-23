@@ -20,6 +20,7 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTableWidget>
 #include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -28,27 +29,38 @@ class Ui_MainWindow
 {
 public:
     QWidget *centralwidget;
+    QVBoxLayout *verticalLayout_main;
     QTabWidget *tabWidget;
     QWidget *tab;
+    QVBoxLayout *verticalLayout_tab1;
     QLabel *label;
     QTableWidget *tableWidget;
     QWidget *tab_2;
+    QVBoxLayout *verticalLayout_tab2;
     QTreeWidget *tableWidget_2;
     QWidget *tab_3;
+    QVBoxLayout *verticalLayout_tab3;
     QTreeWidget *treeWidget;
     QWidget *tab_4;
+    QVBoxLayout *verticalLayout_tab4;
     QTabWidget *tabWidget_2;
     QWidget *tab_7;
+    QVBoxLayout *verticalLayout_tab7;
     QTreeWidget *treeWidget_2;
     QWidget *tab_8;
+    QVBoxLayout *verticalLayout_tab8;
     QPlainTextEdit *plainTextEdit;
     QWidget *tab_9;
+    QVBoxLayout *verticalLayout_tab9;
     QTreeWidget *treeWidget_3;
     QWidget *tab_10;
+    QVBoxLayout *verticalLayout_tab10;
     QTreeWidget *treeWidget_4;
     QWidget *tab_5;
+    QVBoxLayout *verticalLayout_tab5;
     QTreeWidget *treeWidget_5;
     QWidget *tab_6;
+    QVBoxLayout *verticalLayout_tab6;
     QTreeWidget *treeWidget_6;
     QMenuBar *menubar;
     QStatusBar *statusbar;
@@ -57,21 +69,26 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(1185, 444);
+        MainWindow->resize(1206, 723);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
+        verticalLayout_main = new QVBoxLayout(centralwidget);
+        verticalLayout_main->setObjectName("verticalLayout_main");
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName("tabWidget");
-        tabWidget->setGeometry(QRect(0, 10, 1181, 711));
         tab = new QWidget();
         tab->setObjectName("tab");
+        verticalLayout_tab1 = new QVBoxLayout(tab);
+        verticalLayout_tab1->setObjectName("verticalLayout_tab1");
         label = new QLabel(tab);
         label->setObjectName("label");
-        label->setGeometry(QRect(10, 10, 121, 21));
         QFont font;
         font.setFamilies({QString::fromUtf8("Consolas")});
         font.setBold(true);
         label->setFont(font);
+
+        verticalLayout_tab1->addWidget(label);
+
         tableWidget = new QTableWidget(tab);
         if (tableWidget->columnCount() < 6)
             tableWidget->setColumnCount(6);
@@ -112,7 +129,6 @@ public:
         QTableWidgetItem *__qtablewidgetitem16 = new QTableWidgetItem();
         tableWidget->setItem(0, 4, __qtablewidgetitem16);
         tableWidget->setObjectName("tableWidget");
-        tableWidget->setGeometry(QRect(10, 50, 1161, 291));
         tableWidget->setFont(font);
         tableWidget->setLineWidth(5);
         tableWidget->setMidLineWidth(0);
@@ -122,69 +138,111 @@ public:
         tableWidget->verticalHeader()->setCascadingSectionResizes(false);
         tableWidget->verticalHeader()->setProperty("showSortIndicator", QVariant(false));
         tableWidget->verticalHeader()->setStretchLastSection(false);
+
+        verticalLayout_tab1->addWidget(tableWidget);
+
         tabWidget->addTab(tab, QString());
         tab_2 = new QWidget();
         tab_2->setObjectName("tab_2");
+        verticalLayout_tab2 = new QVBoxLayout(tab_2);
+        verticalLayout_tab2->setObjectName("verticalLayout_tab2");
         tableWidget_2 = new QTreeWidget(tab_2);
         tableWidget_2->setObjectName("tableWidget_2");
-        tableWidget_2->setGeometry(QRect(10, 10, 1161, 331));
         tableWidget_2->setColumnCount(3);
+
+        verticalLayout_tab2->addWidget(tableWidget_2);
+
         tabWidget->addTab(tab_2, QString());
         tab_3 = new QWidget();
         tab_3->setObjectName("tab_3");
+        verticalLayout_tab3 = new QVBoxLayout(tab_3);
+        verticalLayout_tab3->setObjectName("verticalLayout_tab3");
         treeWidget = new QTreeWidget(tab_3);
         QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem();
         __qtreewidgetitem->setText(0, QString::fromUtf8("Process"));
         treeWidget->setHeaderItem(__qtreewidgetitem);
         treeWidget->setObjectName("treeWidget");
-        treeWidget->setGeometry(QRect(10, 10, 1161, 331));
+
+        verticalLayout_tab3->addWidget(treeWidget);
+
         tabWidget->addTab(tab_3, QString());
         tab_4 = new QWidget();
         tab_4->setObjectName("tab_4");
+        verticalLayout_tab4 = new QVBoxLayout(tab_4);
+        verticalLayout_tab4->setObjectName("verticalLayout_tab4");
         tabWidget_2 = new QTabWidget(tab_4);
         tabWidget_2->setObjectName("tabWidget_2");
-        tabWidget_2->setGeometry(QRect(0, 10, 1171, 341));
         tab_7 = new QWidget();
         tab_7->setObjectName("tab_7");
+        verticalLayout_tab7 = new QVBoxLayout(tab_7);
+        verticalLayout_tab7->setObjectName("verticalLayout_tab7");
         treeWidget_2 = new QTreeWidget(tab_7);
         treeWidget_2->setObjectName("treeWidget_2");
-        treeWidget_2->setGeometry(QRect(10, 10, 1151, 291));
+
+        verticalLayout_tab7->addWidget(treeWidget_2);
+
         tabWidget_2->addTab(tab_7, QString());
         tab_8 = new QWidget();
         tab_8->setObjectName("tab_8");
+        verticalLayout_tab8 = new QVBoxLayout(tab_8);
+        verticalLayout_tab8->setObjectName("verticalLayout_tab8");
         plainTextEdit = new QPlainTextEdit(tab_8);
         plainTextEdit->setObjectName("plainTextEdit");
-        plainTextEdit->setGeometry(QRect(10, 10, 1151, 291));
+
+        verticalLayout_tab8->addWidget(plainTextEdit);
+
         tabWidget_2->addTab(tab_8, QString());
         tab_9 = new QWidget();
         tab_9->setObjectName("tab_9");
+        verticalLayout_tab9 = new QVBoxLayout(tab_9);
+        verticalLayout_tab9->setObjectName("verticalLayout_tab9");
         treeWidget_3 = new QTreeWidget(tab_9);
         treeWidget_3->setObjectName("treeWidget_3");
-        treeWidget_3->setGeometry(QRect(10, 10, 1151, 291));
+
+        verticalLayout_tab9->addWidget(treeWidget_3);
+
         tabWidget_2->addTab(tab_9, QString());
         tab_10 = new QWidget();
         tab_10->setObjectName("tab_10");
+        verticalLayout_tab10 = new QVBoxLayout(tab_10);
+        verticalLayout_tab10->setObjectName("verticalLayout_tab10");
         treeWidget_4 = new QTreeWidget(tab_10);
         treeWidget_4->setObjectName("treeWidget_4");
-        treeWidget_4->setGeometry(QRect(0, 0, 1161, 301));
+
+        verticalLayout_tab10->addWidget(treeWidget_4);
+
         tabWidget_2->addTab(tab_10, QString());
+
+        verticalLayout_tab4->addWidget(tabWidget_2);
+
         tabWidget->addTab(tab_4, QString());
         tab_5 = new QWidget();
         tab_5->setObjectName("tab_5");
+        verticalLayout_tab5 = new QVBoxLayout(tab_5);
+        verticalLayout_tab5->setObjectName("verticalLayout_tab5");
         treeWidget_5 = new QTreeWidget(tab_5);
         treeWidget_5->setObjectName("treeWidget_5");
-        treeWidget_5->setGeometry(QRect(0, 0, 1181, 361));
+
+        verticalLayout_tab5->addWidget(treeWidget_5);
+
         tabWidget->addTab(tab_5, QString());
         tab_6 = new QWidget();
         tab_6->setObjectName("tab_6");
+        verticalLayout_tab6 = new QVBoxLayout(tab_6);
+        verticalLayout_tab6->setObjectName("verticalLayout_tab6");
         treeWidget_6 = new QTreeWidget(tab_6);
         treeWidget_6->setObjectName("treeWidget_6");
-        treeWidget_6->setGeometry(QRect(0, 0, 1171, 371));
+
+        verticalLayout_tab6->addWidget(treeWidget_6);
+
         tabWidget->addTab(tab_6, QString());
+
+        verticalLayout_main->addWidget(tabWidget);
+
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 1185, 21));
+        menubar->setGeometry(QRect(0, 0, 1206, 21));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName("statusbar");
@@ -193,7 +251,7 @@ public:
         retranslateUi(MainWindow);
 
         tabWidget->setCurrentIndex(5);
-        tabWidget_2->setCurrentIndex(3);
+        tabWidget_2->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
