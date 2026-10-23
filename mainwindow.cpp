@@ -1074,6 +1074,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
 
+    if (FAILED(hr)){
+        char fullIt[2400];
+        sprintf(fullIt, "ITaskService::Connect failed. %s", errorExtention);
+        MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
+    }
 
 
 }
