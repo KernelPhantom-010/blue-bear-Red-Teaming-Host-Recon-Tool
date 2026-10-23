@@ -4,6 +4,7 @@
 #include <QTabWidget>
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
+#include <QEasingCurve>
 
 // Fadet die jeweils neu angezeigte Tab-Seite beim Wechsel sanft ein.
 class TabFadeAnimation : public QObject
@@ -24,13 +25,14 @@ private slots:
 			return;
 
 		auto* effect = new QGraphicsOpacityEffect(page);
+		effect->setOpacity(0.0);
 		page->setGraphicsEffect(effect);
 
 		auto* animation = new QPropertyAnimation(effect, "opacity", this);
-		animation->setDuration(220);
+		animation->setDuration(320);
 		animation->setStartValue(0.0);
 		animation->setEndValue(1.0);
-		animation->setEasingCurve(QEasingCurve::OutCubic);
+		animation->setEasingCurve(QEasingCurve::OutQuint);
 
 		connect(animation, &QPropertyAnimation::finished, page, [page]() {
 			page->setGraphicsEffect(nullptr);
