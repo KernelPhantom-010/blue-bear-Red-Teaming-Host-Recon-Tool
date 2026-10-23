@@ -12,7 +12,7 @@ LIBS += -lole32
 SOURCES += \
     main.cpp \
     mainwindow.cpp
-
+HEADERS += tabfadeanimation.h
 HEADERS += \
     build/Worker.h \
     mainwindow.h

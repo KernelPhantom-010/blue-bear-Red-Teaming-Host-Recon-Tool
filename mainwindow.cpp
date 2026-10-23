@@ -19,6 +19,7 @@
 #include "mainwindow.h"
 #include <iphlpapi.h>
 #include "ui_mainwindow.h"
+#include "tabfadeanimation.h"
 #include <QTimer>
 #include <thread>
 #pragma comment(lib, "oleaut32.lib")
@@ -183,6 +184,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    new TabFadeAnimation(ui->tabWidget, this);
+    new TabFadeAnimation(ui->tabWidget_2, this);
     ui->tableWidget_2->setColumnCount(3);
     ui->tableWidget_2->setColumnWidth(0, 200);
     ui->tableWidget_2->setColumnWidth(1, 80);
@@ -190,6 +193,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     tw->setColumnWidth(0, 180); // Process
     tw->setColumnWidth(1, 60);  // PID
+
     tw->setColumnWidth(2, 160); // SeImpersonatePrivilege?
     tw->setColumnWidth(3, 140); // SeDebugPrivilege?
     tw->setColumnWidth(4, 180); // Token-Owner
@@ -1121,6 +1125,8 @@ MainWindow::MainWindow(QWidget *parent)
             }
         }
     }
+
+    //Here Startup Folder implementation
 
 
 
