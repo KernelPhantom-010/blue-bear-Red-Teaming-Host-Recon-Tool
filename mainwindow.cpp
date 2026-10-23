@@ -14,12 +14,14 @@
 #include <DSRole.h>
 #include <lmapibuf.h>
 #include <netioapi.h>
+#include <comdef.h>
 #include <taskschd.h>
 #include "mainwindow.h"
 #include <iphlpapi.h>
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <thread>
+#pragma comment(lib, "oleaut32.lib")
 #pragma comment(lib, "User32.lib")
 #pragma comment(lib, "taskschd.lib")
 #pragma comment(lib, "Kernel32.lib")
@@ -27,6 +29,8 @@
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "Wldap32.lib")
 #pragma comment(lib, "Iphlpapi.lib")
+
+const char* errorExtention = "\nI'am aware of this possible error. Please open an issue on my GitHub so I can help!";
 
 QString whichStatus(DWORD statusCode){
     switch (statusCode){
@@ -1058,11 +1062,17 @@ MainWindow::MainWindow(QWidget *parent)
         MessageBoxA(NULL, "Cannot initialize COM", "Warning", MB_OK);
     }
     ITaskService* pService = nullptr;
-    CoCreateInstance(CLSID_TaskScheduler, nullptr, CLSCTX_INPROC_SERVER, IID_ITaskService, reinterpret_cast<void**>(&pService));
+    hr = CoCreateInstance(CLSID_TaskScheduler, nullptr, CLSCTX_INPROC_SERVER, IID_ITaskService, reinterpret_cast<void**>(&pService));
 
 
+    if (FAILED(hr)){
+        char fullIt[2400];
+        sprintf(fullIt, "CoCreateInstance failed. %s", errorExtention);
+        MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
+    }
 
 
+    hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
 
 
 
