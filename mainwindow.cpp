@@ -1058,8 +1058,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
-    if (FAILED(hr)) {
-        MessageBoxA(NULL, "Cannot initialize COM", "Warning", MB_OK);
+    if (hr != RPC_E_CHANGED_MODE) {
+        char msg[64];
+        sprintf_s(msg, "CoInitializeEx failed: 0x%08X", hr);
+        MessageBoxA(NULL, msg, "Warning", MB_OK);
     }
     ITaskService* pService = nullptr;
     hr = CoCreateInstance(CLSID_TaskScheduler, nullptr, CLSCTX_INPROC_SERVER, IID_ITaskService, reinterpret_cast<void**>(&pService));
@@ -1106,9 +1108,10 @@ MainWindow::MainWindow(QWidget *parent)
                             BSTR name = nullptr;
                             if (SUCCEEDED(pTask->get_Name(&name)))
                             {
-                                std::wcout << L"  " << name << std::endl;
-                                QTreeWidgetItem* itemmLastt = new QTreeWidgetItem(ui->treeWidget_6);
-                                itemmLastt->setText(2, QString::fromStdWString(std::wstring(name)));
+                                int row = i - 1;
+                                QTreeWidgetItem* item = (row < ui->treeWidget_6->topLevelItemCount()) ? ui->treeWidget_6->topLevelItem(row): new QTreeWidgetItem(ui->treeWidget_6);
+
+                                item->setText(2, QString::fromWCharArray(name));
                                 SysFreeString(name);
                             }
                             pTask->Release();
