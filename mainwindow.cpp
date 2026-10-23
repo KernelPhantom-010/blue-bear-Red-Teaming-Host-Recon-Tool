@@ -1069,16 +1069,56 @@ MainWindow::MainWindow(QWidget *parent)
         char fullIt[2400];
         sprintf(fullIt, "CoCreateInstance failed. %s", errorExtention);
         MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
+        CoUninitialize();
+
+    }else{
+        hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
+        if (FAILED(hr)){
+            char fullIt[2400];
+            sprintf(fullIt, "ITaskService::Connect failed. %s", errorExtention);
+            MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
+            CoUninitialize();
+        }else{
+            ITaskFolder* rootFolder = nullptr;
+            hr = pService->GetFolder(_bstr_t(L"\\"), &rootFolder);
+
+            if (FAILED(hr)){
+                char fullIt[2400];
+                sprintf(fullIt, "ITaskService::GetFolder failed. %s", errorExtention);
+                MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
+                CoUninitialize();
+            }else{
+                IRegisteredTaskCollection* pTasks = nullptr;
+                hr = rootFolder->GetTasks(TASK_ENUM_HIDDEN, &pTasks);
+                if (FAILED(hr)){
+                    char fullIt[2400];
+                    sprintf(fullIt, "ITaskService::GetTasks failed. %s", errorExtention);
+                    MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
+                    CoUninitialize();
+                }else{
+                    LONG count = 0;
+                    pTasks->get_Count(&count);
+                    for (LONG i = 0; i < count; i++)
+                    {
+                        IRegisteredTask* pTask = nullptr;
+                        if (SUCCEEDED(pTasks->get_Item(_variant_t(i), &pTask)))
+                        {
+                            BSTR name = nullptr;
+                            if (SUCCEEDED(pTask->get_Name(&name)))
+                            {
+                                std::wcout << L"  " << name << std::endl;
+                                QTreeWidgetItem* itemmLastt = new QTreeWidgetItem(ui->treeWidget_6);
+                                itemmLastt->setText(2, QString::fromStdWString(std::wstring(name)));
+                                SysFreeString(name);
+                            }
+                            pTask->Release();
+                        }
+                    }
+                }
+            }
+        }
     }
 
-
-    hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
-
-    if (FAILED(hr)){
-        char fullIt[2400];
-        sprintf(fullIt, "ITaskService::Connect failed. %s", errorExtention);
-        MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
-    }
 
 
 }
