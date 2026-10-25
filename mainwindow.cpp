@@ -1128,6 +1128,33 @@ MainWindow::MainWindow(QWidget *parent)
 
     //Here Startup Folder implementation
 
+    TCHAR userName[250];
+    DWORD userLengtsh = 250 + 1;
+    BOOL userNameIsSet = FALSE;
+
+    if (GetUserName(userName, &userLengtsh)){
+        printf("Username set");
+        userNameIsSet = TRUE;
+    }else{
+        MessageBoxA(NULL, "cannot get username!", "Warning", NULL);
+        userNameIsSet = FALSE;
+    }
+
+    if (userNameIsSet == TRUE){
+
+        char FullPathForStartup[2560];
+        char fullUsernameConv[250 + 1];
+
+        WideCharToMultiByte(CP_UTF8, 0, userName, -1, fullUsernameConv, 256, NULL, NULL);
+        sprintf(FullPathForStartup, "C:\\Users\\%s\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup", fullUsernameConv);
+
+
+
+    }
+
+
+
+
 
 
 }
