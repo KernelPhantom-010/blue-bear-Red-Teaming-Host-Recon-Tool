@@ -1311,6 +1311,8 @@ void MainWindow::refreshAllData()
                 services2->Release();
             }
             locator->Release();
+
+
         }
     }
 }
