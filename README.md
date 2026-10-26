@@ -85,7 +85,7 @@ All data is gathered live and can be refreshed at any time via the **Refresh but
 ## Requirements
 
 - Windows 10 / Windows 11
-- **Administrator privileges** (required for full enumeration)
+- **Administrator privileges** (ONLY required for full enumeration. The tool will also work without admin privileges absolutely fine!)
 - MSVC 2022 runtime
 - Qt 6.x runtime (bundled via `windeployqt`)
 
