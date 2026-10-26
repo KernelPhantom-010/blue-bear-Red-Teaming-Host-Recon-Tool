@@ -19,7 +19,7 @@ CXXFLAGS      = -nologo -Zc:wchar_t -FS -Zc:rvalueCast -Zc:inline -Zc:strictStri
 INCPATH       = -I..\..\..\RedTeamHostRecon -I. -IC:\Qt\6.11.2\msvc2022_64\include -IC:\Qt\6.11.2\msvc2022_64\include\QtWidgets -IC:\Qt\6.11.2\msvc2022_64\include\QtGui -IC:\Qt\6.11.2\msvc2022_64\include\QtCore -Idebug -I. -I/include -IC:\Qt\6.11.2\msvc2022_64\mkspecs\win32-msvc 
 LINKER        = link
 LFLAGS        = /NOLOGO /DYNAMICBASE /NXCOMPAT /DEBUG /SUBSYSTEM:WINDOWS "/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'"
-LIBS          = Netapi32.lib Wldap32.lib ws2_32.lib ole32.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Widgetsd.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Guid.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Cored.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6EntryPointd.lib shell32.lib  
+LIBS          = Netapi32.lib Wldap32.lib ws2_32.lib ole32.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Widgetsd.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Guid.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Cored.lib debug\RedTeamHostRecon_resource.res C:\Qt\6.11.2\msvc2022_64\lib\Qt6EntryPointd.lib shell32.lib  
 QMAKE         = C:\Qt\6.11.2\msvc2022_64\bin\qmake.exe
 DEL_FILE      = del
 CHK_DIR_EXISTS= if not exist
@@ -40,7 +40,7 @@ IDC           = idc
 IDL           = midl
 ZIP           = zip -r -9
 DEF_FILE      = 
-RES_FILE      = 
+RES_FILE      = debug\RedTeamHostRecon_resource.res
 SED           = $(QMAKE) -install sed
 MOVE          = move
 
@@ -136,11 +136,14 @@ DESTDIR_TARGET = debug\RedTeamHostRecon.exe
 first: all
 all: Makefile.Debug  debug\RedTeamHostRecon.exe
 
-debug\RedTeamHostRecon.exe: C:\Qt\6.11.2\msvc2022_64\lib\Qt6Widgetsd.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Guid.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Cored.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6EntryPointd.lib ui_mainwindow.h $(OBJECTS) 
+debug\RedTeamHostRecon.exe: C:\Qt\6.11.2\msvc2022_64\lib\Qt6Widgetsd.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Guid.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6Cored.lib C:\Qt\6.11.2\msvc2022_64\lib\Qt6EntryPointd.lib ui_mainwindow.h $(OBJECTS) debug\RedTeamHostRecon_resource.res
 	$(LINKER) $(LFLAGS) /MANIFEST:embed /OUT:$(DESTDIR_TARGET) @<<
 debug\main.obj debug\mainwindow.obj debug\moc_tabfadeanimation.obj debug\moc_mainwindow.obj
 $(LIBS)
 <<
+
+debug\RedTeamHostRecon_resource.res: RedTeamHostRecon_resource.rc
+	rc /NOLOGO -D_DEBUG $(DEFINES) -fo debug\RedTeamHostRecon_resource.res RedTeamHostRecon_resource.rc
 
 qmake: FORCE
 	@$(QMAKE) -o Makefile.Debug ..\..\RedTeamHostRecon.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
@@ -153,6 +156,7 @@ dist:
 clean: compiler_clean 
 	-$(DEL_FILE) debug\main.obj debug\mainwindow.obj debug\moc_tabfadeanimation.obj debug\moc_mainwindow.obj
 	-$(DEL_FILE) debug\RedTeamHostRecon.vc.pdb debug\RedTeamHostRecon.ilk debug\RedTeamHostRecon.idb
+	-$(DEL_FILE) debug\RedTeamHostRecon_resource.res
 
 distclean: clean 
 	-$(DEL_FILE) .qmake.stash debug\RedTeamHostRecon.pdb
@@ -389,6 +393,7 @@ debug\moc_tabfadeanimation.cpp: ..\..\tabfadeanimation.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qvariantanimation.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qabstractanimation.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qeasingcurve.h \
+		C:\Qt\6.11.2\msvc2022_64\include\QtCore\QEasingCurve \
 		debug\moc_predefs.h \
 		C:\Qt\6.11.2\msvc2022_64\bin\moc.exe
 	C:\Qt\6.11.2\msvc2022_64\bin\moc.exe $(DEFINES) --compiler-flavor=msvc --include C:/Users/User/Documents/RedTeamHostRecon/build/Desktop_Qt_6_11_2_MSVC2022_64bit_Release/debug/moc_predefs.h -IC:/Qt/6.11.2/msvc2022_64/mkspecs/win32-msvc -IC:/Users/User/Documents/RedTeamHostRecon -IC:/Qt/6.11.2/msvc2022_64/include -IC:/Qt/6.11.2/msvc2022_64/include/QtWidgets -IC:/Qt/6.11.2/msvc2022_64/include/QtGui -IC:/Qt/6.11.2/msvc2022_64/include/QtCore -I. -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include" -I"C:\Program Files (x86)\Windows Kits\10\include\10.0.28000.0\ucrt" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.28000.0\\um" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.28000.0\\shared" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.28000.0\\winrt" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.28000.0\\cppwinrt" -I"C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\include\um" ..\..\tabfadeanimation.h -o debug\moc_tabfadeanimation.cpp
@@ -1036,62 +1041,8 @@ debug\mainwindow.obj: ..\..\mainwindow.cpp ..\..\mainwindow.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qguiapplication_platform.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qtabwidget.h \
 		ui_mainwindow.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtCore\QVariant \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QApplication \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qapplication.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QHeaderView \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qheaderview.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qabstractitemview.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qabstractscrollarea.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qframe.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qabstractitemmodel.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qitemselectionmodel.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qabstractitemdelegate.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qstyleoption.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qabstractspinbox.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qvalidator.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qregularexpression.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qslider.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qabstractslider.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qstyle.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qtabbar.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qrubberband.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QLabel \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qlabel.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qpicture.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qtextdocument.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QMenuBar \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qmenubar.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qmenu.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QPlainTextEdit \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qplaintextedit.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qtextedit.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qtextoption.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qtextcursor.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qtextformat.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qpen.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qabstracttextdocumentlayout.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qtextlayout.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qglyphrun.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qrawfont.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtGui\qfontdatabase.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QStatusBar \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qstatusbar.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QTabWidget \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QTableWidget \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qtablewidget.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qtableview.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QTreeWidget \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qtreewidget.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qtreeview.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qtreewidgetitemiterator.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QVBoxLayout \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qboxlayout.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qlayout.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qlayoutitem.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qgridlayout.h \
-		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QWidget \
 		..\..\tabfadeanimation.h \
+		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QTabWidget \
 		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QGraphicsOpacityEffect \
 		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qgraphicseffect.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtCore\QPropertyAnimation \
@@ -1099,8 +1050,13 @@ debug\mainwindow.obj: ..\..\mainwindow.cpp ..\..\mainwindow.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qvariantanimation.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qabstractanimation.h \
 		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qeasingcurve.h \
+		C:\Qt\6.11.2\msvc2022_64\include\QtCore\QEasingCurve \
 		C:\Qt\6.11.2\msvc2022_64\include\QtCore\QTimer \
-		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qtimer.h
+		C:\Qt\6.11.2\msvc2022_64\include\QtCore\qtimer.h \
+		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\QPushButton \
+		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qpushbutton.h \
+		C:\Qt\6.11.2\msvc2022_64\include\QtWidgets\qabstractbutton.h \
+		C:\Qt\6.11.2\msvc2022_64\include\QtGui\QShowEvent
 
 debug\moc_tabfadeanimation.obj: debug\moc_tabfadeanimation.cpp 
 
