@@ -10,7 +10,7 @@
 
 A Windows-based reconnaissance tool for red team operations and security assessments. Blue Bear gives you a clean, purple-themed dashboard to enumerate everything relevant about a target host — processes, tokens, network, services, and persistence — all in one place.
 
-> ⚠️ **For authorized security testing and educational purposes only. Do not use on systems you do not own or have explicit written permission to test. The author is not responsible for any misuse. IT'S STILL UNDER DEVELOPMENT!**
+> ⚠️ **For authorized security testing and educational purposes only. Do not use on systems you do not own or have explicit written permission to test. The author is not responsible for any misuse.**
 
 ---
 
@@ -71,13 +71,14 @@ A complete picture of everything installed as a service or driver:
 ---
 
 ### 📌 Persistence
-Surfaces the most common persistence locations:
+Surfaces the most common persistence locations in a single view:
 
-**Run Keys** — autorun entries for all users and the current user, with full executable paths on hover
+- **Run Keys** — autorun entries for all users and the current user, with full executable paths on hover
+- **Scheduled Tasks** — full task enumeration, including hidden tasks
+- **Startup Folder** — all files dropped in the current user's Startup folder
+- **WMI Event Subscriptions** — registered `__EventFilter` entries, including the WQL query behind each one
 
-**Scheduled Tasks** — full task enumeration including hidden tasks
-
-**Startup Folder** *(in development)*
+All data is gathered live and can be refreshed at any time via the **Refresh button** next to the tab bar — no restart required.
 
 ---
 
@@ -114,6 +115,18 @@ After building, run `windeployqt` to bundle the Qt DLLs:
 ```
 windeployqt BlueBear.exe
 ```
+
+---
+
+## Known False Positives
+
+Because Blue Bear enumerates process tokens, privileges, services, and persistence mechanisms, some antivirus engines (including Windows Defender) may flag it as suspicious. This is expected behavior for a recon tool of this kind and not an indication of malicious code — the binary is not code-signed, which also contributes to this.
+
+---
+
+## Contributing / Feature Requests
+
+This project is actively maintained. If you'd like to see a new feature, find a bug, or run into an issue, please **open an Issue** on this repository rather than reaching out directly — it keeps everything tracked in one place and helps other users who may run into the same thing.
 
 ---
 
