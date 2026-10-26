@@ -9,6 +9,8 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+class QShowEvent;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -17,8 +19,14 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
+protected:
+    void showEvent(QShowEvent *event) override;
+
 private:
+    void refreshAllData();
+
     Ui::MainWindow *ui;
+    bool m_firstShowDone = false;
 };
 
 #endif // MAINWINDOW_H

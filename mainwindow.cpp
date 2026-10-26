@@ -12,7 +12,9 @@
 #include <locale.h>
 #include <codecvt>
 #include <DSRole.h>
+#include <filesystem>
 #include <lmapibuf.h>
+#include <wbemcli.h>
 #include <netioapi.h>
 #include <comdef.h>
 #include <taskschd.h>
@@ -21,10 +23,16 @@
 #include "ui_mainwindow.h"
 #include "tabfadeanimation.h"
 #include <QTimer>
+#include <QPushButton>
+#include <QPropertyAnimation>
+#include <QEasingCurve>
+#include <QShowEvent>
+#include <Wbemidl.h>
 #include <thread>
 #pragma comment(lib, "oleaut32.lib")
 #pragma comment(lib, "User32.lib")
 #pragma comment(lib, "taskschd.lib")
+#pragma comment(lib, "wbemuuid.lib")
 #pragma comment(lib, "Kernel32.lib")
 #pragma comment(lib, "Netapi32.lib")
 #pragma comment(lib, "Advapi32.lib")
@@ -179,26 +187,47 @@ std::wstring GetServiceTypeString(DWORD type) {
 
     return result.empty() ? L"Unknown" : result;
 }
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     new TabFadeAnimation(ui->tabWidget, this);
     new TabFadeAnimation(ui->tabWidget_2, this);
+
     ui->tableWidget_2->setColumnCount(3);
     ui->tableWidget_2->setColumnWidth(0, 200);
     ui->tableWidget_2->setColumnWidth(1, 80);
+
     QTreeWidget* tw = ui->treeWidget;
 
     tw->setColumnWidth(0, 180); // Process
     tw->setColumnWidth(1, 60);  // PID
-
     tw->setColumnWidth(2, 160); // SeImpersonatePrivilege?
     tw->setColumnWidth(3, 140); // SeDebugPrivilege?
     tw->setColumnWidth(4, 180); // Token-Owner
-    tw->setColumnWidth(5, 110); // Integrity Levell
+    tw->setColumnWidth(5, 110); // Integrity Level
     tw->header()->setStretchLastSection(true);
+
+    // Refresh-Button rechts neben den Tabs (neben "Persistence")
+    QPushButton* refreshButton = new QPushButton("⟳  Aktualisieren", this);
+    refreshButton->setObjectName("refreshButton");
+    refreshButton->setCursor(Qt::PointingHandCursor);
+    connect(refreshButton, &QPushButton::clicked, this, [this, refreshButton]()
+            {
+                refreshButton->setEnabled(false);
+                refreshButton->setText("Aktualisiere...");
+                setCursor(Qt::WaitCursor);
+
+                refreshAllData();
+
+                unsetCursor();
+                refreshButton->setText("⟳  Aktualisieren");
+                refreshButton->setEnabled(true);
+            });
+    ui->tabWidget->setCornerWidget(refreshButton, Qt::TopRightCorner);
 
     QTimer* timer = new QTimer(this);
 
@@ -230,7 +259,40 @@ MainWindow::MainWindow(QWidget *parent)
 
     EnableDebugPrivilege();
 
-    int testnum;
+    refreshAllData();
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    QMainWindow::showEvent(event);
+
+    if (m_firstShowDone)
+        return;
+
+    m_firstShowDone = true;
+
+    setWindowOpacity(0.0);
+
+    auto* fadeIn = new QPropertyAnimation(this, "windowOpacity", this);
+    fadeIn->setDuration(650);
+    fadeIn->setStartValue(0.0);
+    fadeIn->setEndValue(1.0);
+    fadeIn->setEasingCurve(QEasingCurve::OutCubic);
+    fadeIn->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void MainWindow::refreshAllData()
+{
+    // Alle Listen leeren, damit ein erneuter Aufruf nicht dupliziert
+    ui->treeWidget->clear();
+    ui->tableWidget_2->clear();
+    ui->treeWidget_2->clear();
+    ui->treeWidget_3->clear();
+    ui->treeWidget_4->clear();
+    ui->treeWidget_5->clear();
+    ui->treeWidget_6->clear();
+    ui->plainTextEdit->clear();
+
     QTableWidgetItem * o = ui->tableWidget->item(0,0);
     QTableWidgetItem * oVersion = ui->tableWidget->item(0, 1);
     if(o){
@@ -339,7 +401,7 @@ MainWindow::MainWindow(QWidget *parent)
             wprintf(L"Domain: %s\n", domainInfo->DomainName);
         }
 
-        // LDAP nur versuchen, wenn wir überhaupt eine Domain haben
+
         if (haveDomainInfo){
 
             LDAP* connectLdap = ldap_initW(NULL, LDAP_PORT);
@@ -447,8 +509,6 @@ MainWindow::MainWindow(QWidget *parent)
     PROCESSENTRY32W processEntryStruct = {};
     processEntryStruct.dwSize = sizeof(PROCESSENTRY32W);
 
-    int currentRow = 0;
-
     BOOL ret = Process32FirstW(snapshotHandle, &processEntryStruct);
     std::vector<DWORD> pids;
     if (!ret) {
@@ -544,9 +604,6 @@ MainWindow::MainWindow(QWidget *parent)
     MIB_TCPTABLE_OWNER_PID* pTcpTable = reinterpret_cast<MIB_TCPTABLE_OWNER_PID*>(buf.data());
     DWORD ret5 = GetExtendedTcpTable(pTcpTable, &size, FALSE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0);
 
-    //morgen:
-    //For schleife über pTcpTable->dwNumEntries
-
     for (int i = 0; i < pids.size(); i++){
         HANDLE procH = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pids[i]);
 
@@ -566,8 +623,6 @@ MainWindow::MainWindow(QWidget *parent)
                 std::vector<BYTE> privBuf(retLength);
                 TOKEN_PRIVILEGES* privStruct = reinterpret_cast<TOKEN_PRIVILEGES*>(privBuf.data());
                 BOOL ret1 = GetTokenInformation(tokenHandle, TokenPrivileges, privStruct, retLength, &retLength);
-
-                //SET :)
 
                 retLength = 0;
                 GetTokenInformation(tokenHandle, TokenUser, nullptr, 0, &retLength);
@@ -650,10 +705,6 @@ MainWindow::MainWindow(QWidget *parent)
                 item->setText(4, QString::fromStdString(fullOwnerStdStr));
                 item->setText(5, integrityLevel);
 
-
-
-
-
                 CloseHandle(procH);
                 CloseHandle(tokenHandle);
             }
@@ -685,7 +736,6 @@ MainWindow::MainWindow(QWidget *parent)
             DWORD localPort = ntohs((u_short)row.dwLocalPort);
             DWORD remotePort = ntohs((u_short)row.dwRemotePort);
 
-            // Prozessname aus pids/processNames nachschlagen
             QString procName = "Unknown";
             for (int x = 0; x < (int)pids.size(); x++){
                 if (pids[x] == row.dwOwningPid){
@@ -706,15 +756,12 @@ MainWindow::MainWindow(QWidget *parent)
             int count = 0;
 
             for (DWORD entry : vectorForState){
-                //für jedes entry hier einmal abchecken ob es aus pTcpTable.pState übereinstimmt und wenn ja jeweils item->setText(4, ... setzen!
                 if (entry == pTcpTableNet->table[i].dwState){
                     std::string tcpName = GetTcpStateName(entry);
                     item->setText(4, QString::fromStdString(tcpName));
                 }
                 count++;
             }
-
-
 
         }
 
@@ -941,10 +988,6 @@ MainWindow::MainWindow(QWidget *parent)
 
         }
 
-
-
-
-
     }
 
     //Persistence next here
@@ -997,9 +1040,6 @@ MainWindow::MainWindow(QWidget *parent)
     }else{
         MessageBoxA(NULL, "Run-Key Lookup for all users failed", "Warning", MB_OK);
     }
-
-
-
 
     HKEY runKeyHandle2;
     LONG openResult2 = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_READ, &runKeyHandle2);
@@ -1056,17 +1096,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     //Schedules Tasks
 
-
-
-
-
     HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
-    if (hr != RPC_E_CHANGED_MODE) {
+
+    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
         char msg[64];
         sprintf_s(msg, "CoInitializeEx failed: 0x%08X", hr);
         MessageBoxA(NULL, msg, "Warning", MB_OK);
     }
+
     ITaskService* pService = nullptr;
     hr = CoCreateInstance(CLSID_TaskScheduler, nullptr, CLSCTX_INPROC_SERVER, IID_ITaskService, reinterpret_cast<void**>(&pService));
 
@@ -1075,7 +1113,6 @@ MainWindow::MainWindow(QWidget *parent)
         char fullIt[2400];
         sprintf(fullIt, "CoCreateInstance failed. %s", errorExtention);
         MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
-        CoUninitialize();
 
     }else{
         hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
@@ -1083,7 +1120,6 @@ MainWindow::MainWindow(QWidget *parent)
             char fullIt[2400];
             sprintf(fullIt, "ITaskService::Connect failed. %s", errorExtention);
             MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
-            CoUninitialize();
         }else{
             ITaskFolder* rootFolder = nullptr;
             hr = pService->GetFolder(_bstr_t(L"\\"), &rootFolder);
@@ -1092,7 +1128,6 @@ MainWindow::MainWindow(QWidget *parent)
                 char fullIt[2400];
                 sprintf(fullIt, "ITaskService::GetFolder failed. %s", errorExtention);
                 MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
-                CoUninitialize();
             }else{
                 IRegisteredTaskCollection* pTasks = nullptr;
                 hr = rootFolder->GetTasks(TASK_ENUM_HIDDEN, &pTasks);
@@ -1100,11 +1135,10 @@ MainWindow::MainWindow(QWidget *parent)
                     char fullIt[2400];
                     sprintf(fullIt, "ITaskService::GetTasks failed. %s", errorExtention);
                     MessageBoxA(nullptr, fullIt, "Warning", MB_OK);
-                    CoUninitialize();
                 }else{
                     LONG count = 0;
                     pTasks->get_Count(&count);
-                    for (LONG i = 0; i < count; i++)
+                    for (LONG i = 1; i <= count; i++)
                     {
                         IRegisteredTask* pTask = nullptr;
                         if (SUCCEEDED(pTasks->get_Item(_variant_t(i), &pTask)))
@@ -1113,7 +1147,9 @@ MainWindow::MainWindow(QWidget *parent)
                             if (SUCCEEDED(pTask->get_Name(&name)))
                             {
                                 int row = i - 1;
-                                QTreeWidgetItem* item = (row < ui->treeWidget_6->topLevelItemCount()) ? ui->treeWidget_6->topLevelItem(row): new QTreeWidgetItem(ui->treeWidget_6);
+                                QTreeWidgetItem* item = (row < ui->treeWidget_6->topLevelItemCount())
+                                                            ? ui->treeWidget_6->topLevelItem(row)
+                                                            : new QTreeWidgetItem(ui->treeWidget_6);
 
                                 item->setText(2, QString::fromWCharArray(name));
                                 SysFreeString(name);
@@ -1121,19 +1157,21 @@ MainWindow::MainWindow(QWidget *parent)
                             pTask->Release();
                         }
                     }
+                    pTasks->Release();
                 }
+                rootFolder->Release();
             }
         }
+        pService->Release();
     }
 
-    //Here Startup Folder implementation
+    //Startup Folder implemenntation
 
-    TCHAR userName[250];
-    DWORD userLengtsh = 250 + 1;
+    TCHAR userName[256];
+    DWORD userLengtsh = 256;
     BOOL userNameIsSet = FALSE;
 
     if (GetUserName(userName, &userLengtsh)){
-        printf("Username set");
         userNameIsSet = TRUE;
     }else{
         MessageBoxA(NULL, "cannot get username!", "Warning", NULL);
@@ -1148,15 +1186,133 @@ MainWindow::MainWindow(QWidget *parent)
         WideCharToMultiByte(CP_UTF8, 0, userName, -1, fullUsernameConv, 256, NULL, NULL);
         sprintf(FullPathForStartup, "C:\\Users\\%s\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup", fullUsernameConv);
 
+        try{
+            int rowStartup = 0;
+            for (const auto& entry : std::filesystem::directory_iterator(FullPathForStartup)){
+                if (std::filesystem::is_regular_file(entry.path())){
 
+                    QString fileName = QString::fromStdWString(entry.path().filename().wstring());
+                    QString fullPath = QString::fromStdWString(entry.path().wstring());
+
+                    QTreeWidgetItem* item = (rowStartup < ui->treeWidget_6->topLevelItemCount())
+                                                ? ui->treeWidget_6->topLevelItem(rowStartup)
+                                                : new QTreeWidgetItem(ui->treeWidget_6);
+
+                    item->setText(3, fileName);
+                    item->setToolTip(3, fullPath);
+
+                    rowStartup++;
+                }
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e){
+            MessageBoxA(NULL, e.what(), "Warning", MB_OK);
+        }
 
     }
 
 
+    HRESULT resultWmiSub = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
+    resultWmiSub = CoInitializeSecurity(nullptr, -1, nullptr, nullptr,
+                                        RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
+                                        nullptr, EOAC_NONE, nullptr);
 
+    if (FAILED(resultWmiSub) && resultWmiSub != RPC_E_TOO_LATE) {
+        char msg[128];
+        sprintf_s(msg, "CoInitializeSecurity failed: 0x%08X", resultWmiSub);
+        MessageBoxA(NULL, msg, "Warning", MB_OK);
+    }
+    else {
+        IWbemLocator* locator = nullptr;
+        resultWmiSub = CoCreateInstance(CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER, IID_IWbemLocator, reinterpret_cast<void**>(&locator));
 
+        if (FAILED(resultWmiSub) || !locator) {
+            char msg[128];
+            sprintf_s(msg, "CoCreateInstance (WbemLocator) failed: 0x%08X", resultWmiSub);
+            MessageBoxA(NULL, msg, "Warning", MB_OK);
+        }
+        else {
+            IWbemServices* services2 = nullptr;
+            resultWmiSub = locator->ConnectServer(
+                _bstr_t(L"ROOT\\subscription"),
+                nullptr, nullptr, nullptr,
+                0, nullptr, nullptr,
+                &services2
+                );
 
+            if (FAILED(resultWmiSub) || !services2) {
+                char msg[128];
+                sprintf_s(msg, "ConnectServer failed: 0x%08X", resultWmiSub);
+                MessageBoxA(NULL, msg, "Warning", MB_OK);
+            }
+            else {
+                IEnumWbemClassObject* enumerator = nullptr;
+                resultWmiSub = services2->ExecQuery(
+                    _bstr_t(L"WQL"),
+                    _bstr_t(L"SELECT * FROM __EventFilter"),
+                    WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+                    nullptr,
+                    &enumerator
+                    );
+
+                if (FAILED(resultWmiSub) || !enumerator) {
+                    char msg[128];
+                    sprintf_s(msg, "ExecQuery failed: 0x%08X", resultWmiSub);
+                    MessageBoxA(NULL, msg, "Warning", MB_OK);
+                }
+                else {
+                    IWbemClassObject* classObject = nullptr;
+                    ULONG returnedCount = 0;
+                    int rowWmi = 0;
+
+                    while (true)
+                    {
+                        HRESULT hrNext = enumerator->Next(WBEM_INFINITE, 1, &classObject, &returnedCount);
+
+                        if (hrNext != WBEM_S_NO_ERROR || returnedCount == 0)
+                            break;
+
+                        VARIANT nameVar;
+                        VariantInit(&nameVar);
+                        classObject->Get(L"Name", 0, &nameVar, nullptr, nullptr);
+
+                        VARIANT queryVar;
+                        VariantInit(&queryVar);
+                        classObject->Get(L"Query", 0, &queryVar, nullptr, nullptr);
+
+                        QString filterName = (nameVar.vt == VT_BSTR) ? QString::fromWCharArray(nameVar.bstrVal) : "Unknown";
+                        QString filterQuery = (queryVar.vt == VT_BSTR) ? QString::fromWCharArray(queryVar.bstrVal) : "-";
+
+                        QTreeWidgetItem* item = (rowWmi < ui->treeWidget_6->topLevelItemCount())
+                                                    ? ui->treeWidget_6->topLevelItem(rowWmi)
+                                                    : new QTreeWidgetItem(ui->treeWidget_6);
+
+                        item->setText(4, filterName);
+                        item->setToolTip(4, filterQuery);
+                        rowWmi++;
+
+                        VariantClear(&nameVar);
+                        VariantClear(&queryVar);
+
+                        classObject->Release();
+                        classObject = nullptr;
+                    }
+
+                    if (rowWmi == 0) {
+                        QTreeWidgetItem* item = (ui->treeWidget_6->topLevelItemCount() > 0)
+                        ? ui->treeWidget_6->topLevelItem(0)
+                        : new QTreeWidgetItem(ui->treeWidget_6);
+                        item->setText(4, "No Event Filters found");
+                    }
+
+                    enumerator->Release();
+                }
+                services2->Release();
+            }
+            locator->Release();
+        }
+    }
 }
 
 MainWindow::~MainWindow()
